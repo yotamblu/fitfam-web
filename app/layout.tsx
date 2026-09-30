@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Assistant, Heebo } from "next/font/google";
 import StatusBarTint from "@/components/StatusBarTint";
+import Splash from "@/components/Splash";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
@@ -40,9 +41,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="he"
       dir="rtl"
+      suppressHydrationWarning
       className={`${heebo.variable} ${assistant.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-canvas font-body text-text-primary">
+        <Splash />
         {children}
         <StatusBarTint />
         <ServiceWorkerRegister />

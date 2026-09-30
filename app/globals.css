@@ -50,6 +50,10 @@
   --animate-flicker: flicker 2.4s ease-in-out infinite;
   --animate-pulse-ring: pulse-ring 3s ease-out infinite;
 
+  --animate-splash-out: splash-out 2.3s ease-in-out forwards;
+  --animate-splash-logo: splash-logo 2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-splash-glow: splash-glow 2s ease-in-out both;
+  --animate-splash-bar: splash-bar 1.7s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
   --animate-node-in: node-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-reveal: reveal 2.2s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;
   --animate-pan: pan 16s linear 1 both;
@@ -58,6 +62,56 @@
   --animate-fill: fill 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.6s both;
   --animate-pop: pop 2s ease-in-out infinite;
 
+  @keyframes splash-out {
+    0%,
+    74% {
+      opacity: 1;
+      visibility: visible;
+    }
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+  @keyframes splash-logo {
+    0% {
+      opacity: 0;
+      transform: scale(0.7);
+      filter: blur(14px);
+    }
+    35% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1.06);
+      filter: blur(0);
+    }
+  }
+  @keyframes splash-glow {
+    0% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    45% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0.7;
+      transform: scale(1.25);
+    }
+  }
+  @keyframes splash-bar {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
   @keyframes node-in {
     from {
       opacity: 0;
@@ -186,5 +240,17 @@ body {
   *::after {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+/* Splash: hold every page animation until it finishes, so the landing page animates in after it (see components/Splash.tsx). */
+html[data-splash="on"] body > :not(#splash),
+html[data-splash="on"] body > :not(#splash) * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #splash {
+    display: none;
   }
 }
