@@ -1,3 +1,4 @@
+import Image from "next/image";
 import AuthActions from "@/components/AuthActions";
 import HeroVisual from "@/components/hero/HeroVisual";
 
@@ -20,15 +21,12 @@ export default function Home() {
 
       <div className="relative z-10 flex w-full max-w-md flex-1 flex-col items-center justify-between gap-6 py-6">
         {/* brand */}
-        <header className="animate-rise flex items-center gap-2">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-ember font-heading text-headline-sm font-black text-canvas">
-            F
-          </span>
-          <span className="font-heading text-headline-md font-extrabold tracking-tight">FitFam</span>
+        <header className="animate-rise">
+          <Image src="/logo-transparent.png" alt="FitFam" width={640} height={573} priority className="h-16 w-auto" />
         </header>
 
         <section className="flex w-full flex-col items-center gap-6" aria-labelledby="hero-title">
-          <div className="animate-rise"><HeroVisual /></div>
+          <div className="animate-rise flex w-full justify-center"><HeroVisual /></div>
 
           <div className="animate-rise text-center [animation-delay:120ms]">
             <h1 id="hero-title" className="font-heading text-[32px] leading-10 font-extrabold tracking-tight">

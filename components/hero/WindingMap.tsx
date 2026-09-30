@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { WEEKS, pad, type Week } from "./weeks";
 import { BoltIcon, CheckIcon, LockIcon } from "./icons";
 
@@ -85,9 +88,19 @@ function Node({ week, i }: { week: Week; i: number }) {
 }
 
 export default function WindingMap() {
+  // Each pass: the trail draws, weeks pop in, the camera drifts slowly down, then snaps back up.
+  // Bumping `cycle` remounts the stage so the whole sequence replays forever.
+  const [cycle, setCycle] = useState(0);
+
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="animate-pan absolute inset-x-0 top-0 aspect-[360/600] w-full">
+      <div
+        key={cycle}
+        onAnimationEnd={(e) => {
+          if (e.target === e.currentTarget) setCycle((c) => c + 1);
+        }}
+        className="animate-pan absolute inset-x-0 top-0 aspect-[360/600] w-full"
+      >
         <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="absolute inset-0 size-full" aria-hidden="true">
           <defs>
             <mask id="wm-reveal">
