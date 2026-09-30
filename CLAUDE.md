@@ -22,3 +22,13 @@ The design system was reverse-engineered from a Google Stitch export (`/design-r
 - **Preserve the RTL/bilingual convention**: Hebrew content flows `dir="rtl"`, but numeric/Western data clusters (weights, times, BPM, dates) are wrapped `dir="ltr"` inline — see `tokens.md §2.4`.
 - **The export is mobile-only** — there is no verified tablet/desktop layout; treat any responsive behavior as new design work, not extraction.
 - Placeholder image URLs (`lh3.googleusercontent.com/...`) in the original export are Stitch scratch assets — never ship them; replace with real or self-hosted media.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

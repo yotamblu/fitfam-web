@@ -26,13 +26,13 @@ export default function Home() {
         </header>
 
         <section className="flex w-full flex-col items-center gap-6" aria-labelledby="hero-title">
-          <div className="animate-rise flex w-full justify-center"><HeroVisual /></div>
+          <div className="animate-rise flex w-full shrink-0 justify-center"><HeroVisual /></div>
 
           <div className="animate-rise text-center [animation-delay:120ms]">
             <h1 id="hero-title" className="font-heading text-[32px] leading-10 font-extrabold tracking-tight">
-              התוכנית שלך,
+              תוכנית אימון
               <br />
-              <span className="text-ember">בתור מפה.</span>
+              שמרגישה <span className="text-ember">כמו משחק.</span>
             </h1>
             <p className="mx-auto mt-3 max-w-xs text-body-lg text-text-secondary">
               כל שבוע הוא שלב חדש. מסיימים אימון, פותחים את הבא, ורואים את עצמכם מתקדמים.

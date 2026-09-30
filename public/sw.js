@@ -1,6 +1,8 @@
-// Minimal service worker: makes FitFam installable and keeps the app shell
-// available offline. API traffic is never cached here.
-const CACHE = "fitfam-shell-v1";
+// Minimal service worker: makes FitFam installable and gives a basic offline
+// fallback for page navigations. It deliberately does NOT cache build assets
+// (/_next/static): Next already serves those with proper HTTP caching, and
+// caching them here served stale CSS/JS after deploys and in dev.
+const CACHE = "fitfam-shell-v2";
 const SHELL = ["/"];
 
 self.addEventListener("install", (event) => {
@@ -26,19 +28,5 @@ self.addEventListener("fetch", (event) => {
   if (req.mode === "navigate") {
     event.respondWith(fetch(req).catch(() => caches.match("/")));
     return;
-  }
-
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/")) {
-    event.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(req, copy));
-            return res;
-          }),
-      ),
-    );
   }
 });
