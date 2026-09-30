@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Assistant, Heebo } from "next/font/google";
+import StatusBarTint from "@/components/StatusBarTint";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
@@ -22,6 +23,9 @@ export const metadata: Metadata = {
   applicationName: "FitFam",
   appleWebApp: { capable: true, title: "FitFam", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
+  // Next only emits the unprefixed mobile-web-app-capable tag; iOS needs the apple- one
+  // for the translucent status bar (content flowing under it) to apply in the installed PWA.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 export const viewport: Viewport = {
@@ -40,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-canvas font-body text-text-primary">
         {children}
+        <StatusBarTint />
         <ServiceWorkerRegister />
       </body>
     </html>

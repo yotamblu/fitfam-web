@@ -19,6 +19,9 @@ export default function Home() {
         }}
       />
 
+      {/* grid fades in from the status-bar tint colour (iOS paints that strip as one flat colour) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-status-tint via-status-tint/60 to-transparent" />
+
       <div className="relative z-10 flex w-full max-w-md flex-1 flex-col items-center justify-between gap-6 py-6">
         {/* brand */}
         <header className="animate-rise">

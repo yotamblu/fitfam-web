@@ -22,6 +22,7 @@ The design system was reverse-engineered from a Google Stitch export (`/design-r
 - **Preserve the RTL/bilingual convention**: Hebrew content flows `dir="rtl"`, but numeric/Western data clusters (weights, times, BPM, dates) are wrapped `dir="ltr"` inline — see `tokens.md §2.4`.
 - **The export is mobile-only** — there is no verified tablet/desktop layout; treat any responsive behavior as new design work, not extraction.
 - Placeholder image URLs (`lh3.googleusercontent.com/...`) in the original export are Stitch scratch assets — never ship them; replace with real or self-hosted media.
+- **Top-edge rule (iOS PWA status bar) — applies to every page, always.** iOS paints the status-bar strip as ONE flat colour, taken from the fixed `components/StatusBarTint.tsx` element (colour token `--color-status-tint`, `app/globals.css`). It cannot show a grid, glow, image or gradient. So **never let any page content, background, grid, glow, image or card start with a hard edge at the top of the page.** Fade it in from the tint colour (see the `h-24 bg-gradient-to-b from-status-tint via-status-tint/60 to-transparent` overlay in `app/page.tsx`) — or do whatever else it takes so the page meets the strip with no visible line. On a new page whose top colour differs, keep the strip and the fade matching (update/override the tint) rather than leaving a seam. Keep `StatusBarTint` mounted in `app/layout.tsx`, and keep `viewport-fit=cover` plus the `apple-mobile-web-app-*` meta tags.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

@@ -14,6 +14,8 @@
   --color-ember: #ff5637;
   --color-volt: #a4d64c;
   --color-info: #7bd0ff;
+  /* Approx. colour of the canvas under the ember glow at the top edge; iOS paints its status bar with this (see StatusBarTint). */
+  --color-status-tint: #3d1f1a;
 
   /* Roadmap-only skin (tokens.md 1.5): used only inside components/hero/* map visuals */
   --color-roadmap-canvas: #0a0a0b;
