@@ -1,11 +1,17 @@
-"use client";
-
-import { useState } from "react";
 import { WEEKS, pad, type Week } from "./weeks";
 import { BoltIcon, CheckIcon, LockIcon } from "./icons";
 
-// Design A: the serpentine roadmap. The trail draws itself, the weeks pop in
-// one by one, then the "camera" glides down the path to the locked weeks.
+// The serpentine roadmap. The trail draws itself, the weeks pop in one by one, then the "camera"
+// glides down the path and snaps back. Pure CSS, server-rendered: one 16s loop whose parts all share
+// duration + delay (see globals.css `map-*`). Only transform/opacity/clip-path are animated, so it stays
+// smooth on phones; nothing re-mounts between loops.
+const NODE_ANIM = [
+  "animate-map-node-1",
+  "animate-map-node-2",
+  "animate-map-node-3",
+  "animate-map-node-4",
+  "animate-map-node-5",
+];
 const VB_W = 360;
 const VB_H = 600;
 const POINTS = [
@@ -65,11 +71,10 @@ function Node({ week, i }: { week: Week; i: number }) {
 
   return (
     <div
-      className="animate-node-in absolute flex -translate-y-1/2 items-center gap-3"
+      className={`${NODE_ANIM[i]} absolute flex -translate-y-1/2 items-center gap-3 will-change-transform`}
       style={{
         top: `${(y / VB_H) * 100}%`,
         [onRight ? "right" : "left"]: edge,
-        animationDelay: `${0.5 + i * 0.45}s`,
       }}
     >
       {onRight ? (
@@ -88,27 +93,15 @@ function Node({ week, i }: { week: Week; i: number }) {
 }
 
 export default function WindingMap() {
-  // Each pass: the trail draws, weeks pop in, the camera drifts slowly down, then snaps back up.
-  // Bumping `cycle` remounts the stage so the whole sequence replays forever.
-  const [cycle, setCycle] = useState(0);
-
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div
-        key={cycle}
-        onAnimationEnd={(e) => {
-          if (e.target === e.currentTarget) setCycle((c) => c + 1);
-        }}
-        className="animate-pan absolute inset-x-0 top-0 aspect-[360/600] w-full"
-      >
+      <div className="animate-map-pan absolute inset-x-0 top-0 aspect-[360/600] w-full will-change-transform">
         <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="absolute inset-0 size-full" aria-hidden="true">
-          <defs>
-            <mask id="wm-reveal">
-              <path d={DONE} pathLength={1} fill="none" stroke="white" strokeWidth="10" style={{ strokeDasharray: 1 }} className="animate-reveal" />
-            </mask>
-          </defs>
           <path d={FULL} fill="none" stroke="#27272a" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 6" />
-          <path d={DONE} fill="none" stroke="#bef264" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 6" mask="url(#wm-reveal)" />
+        </svg>
+        {/* completed trail: revealed top-to-bottom with a clip-path instead of an SVG mask (much cheaper to repaint) */}
+        <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="animate-map-trail absolute inset-0 size-full" aria-hidden="true">
+          <path d={DONE} fill="none" stroke="#bef264" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 6" />
         </svg>
         {WEEKS.map((w, i) => (
           <Node key={w.n} week={w} i={i} />
