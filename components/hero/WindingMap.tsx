@@ -44,16 +44,20 @@ function Node({ week, i }: { week: Week; i: number }) {
     >
       {active && <span className="animate-beacon absolute inset-0 rounded-xl border-2 border-roadmap-ember" />}
       {done ? <CheckIcon /> : active ? <BoltIcon className="size-6" /> : <LockIcon />}
-      <span className="absolute -bottom-1.5 -left-1.5 rounded border border-border bg-roadmap-surface px-1 font-heading text-[9px] font-black text-text-secondary">
-        {pad(week.n)}
-      </span>
+      {!week.challenge && (
+        <span className="absolute -bottom-1.5 -left-1.5 rounded border border-border bg-roadmap-surface px-1 font-heading text-[9px] font-black text-text-secondary">
+          {pad(week.n)}
+        </span>
+      )}
     </div>
   );
 
   const label = (
     <div className={`w-28 ${done || active ? "" : "opacity-60"}`}>
       <div className="flex items-center gap-1.5">
-        <span className="font-heading text-body-md font-extrabold text-white">שבוע {pad(week.n)}</span>
+        <span className="font-heading text-body-md font-extrabold text-white">
+          {week.challenge ? "אתגר מעבר רמה" : `אימון ${pad(week.n)}`}
+        </span>
         {done && (
           <span className="rounded border border-roadmap-volt/30 bg-roadmap-volt/10 px-1 font-heading text-[10px] font-bold text-roadmap-volt">
             הושלם

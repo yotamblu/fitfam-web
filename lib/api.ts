@@ -1,4 +1,5 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+// Same-origin by default: next.config.ts forwards /backend/* to the API (see rewrites there).
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "/backend";
 
 export type CurrentUser = {
   id: string;
