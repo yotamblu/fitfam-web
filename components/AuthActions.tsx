@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { api, describeAuthError, type CurrentUser } from "@/lib/api";
+import { useGoogleSignIn } from "@/lib/googleIdentity";
+import GoogleButtonOverlay from "./GoogleButtonOverlay";
 
 function GoogleIcon() {
   return (
@@ -13,36 +16,111 @@ function GoogleIcon() {
   );
 }
 
-// Google Sign-In is the only auth method (see ../../CLAUDE.md). Both actions will
-// end in the same Google flow; the API that verifies the ID token does not exist yet.
+// Google Sign-In is the only auth method (see ../../CLAUDE.md). Both buttons end in the same Google flow: access is
+// invite-only, so "start the journey" and "log in" are the same thing for now. Google only returns an ID token through
+// its own button, so each styled button has Google's real button laid invisibly on top (GoogleButtonOverlay); the
+// token goes to the API, which checks the email against the invited list and sets the session cookie.
 export default function AuthActions() {
+  const [user, setUser] = useState<CurrentUser | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const comingSoon = () =>
-    setNotice("ההתחברות תופעל ברגע שהשרת של FitFam יהיה מוכן. עוד רגע 💪");
+  // Already logged in (valid session cookie)? Then show that instead of the buttons.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .me()
+      .then((current) => {
+        if (!cancelled) setUser(current);
+      })
+      .catch(() => {
+        // not logged in, or the API is unreachable: just show the login buttons
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleCredential = useCallback(async (credential: string) => {
+    setBusy(true);
+    setNotice(null);
+    try {
+      setUser(await api.loginWithGoogle(credential));
+    } catch (error) {
+      setNotice(describeAuthError(error));
+    } finally {
+      setBusy(false);
+    }
+  }, []);
+
+  const googleStatus = useGoogleSignIn(handleCredential);
+
+  const logout = async () => {
+    try {
+      await api.logout();
+    } finally {
+      setUser(null);
+    }
+  };
+
+  if (user) {
+    return (
+      <div className="mx-auto flex w-full max-w-xs flex-col items-center gap-5 text-center">
+        <p className="font-heading text-headline-sm font-bold">
+          שלום{user.displayName ? ` ${user.displayName}` : ""} 👋
+        </p>
+        <p className="text-body-md text-volt">
+          התחברתם בהצלחה. המסע שלכם בדרך, עוד רגע 💪
+        </p>
+        <button
+          type="button"
+          onClick={() => void logout()}
+          className="h-10 rounded-full border border-border-emphasis px-6 text-body-md text-text-secondary transition hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          התנתקות
+        </button>
+      </div>
+    );
+  }
+
+  const message =
+    notice ??
+    (googleStatus === "failed"
+      ? "לא הצלחנו לטעון את ההתחברות של Google. בדקו את החיבור ורעננו."
+      : null);
 
   return (
     <div className="mx-auto flex w-full max-w-xs flex-col gap-5">
-      <button
-        type="button"
-        onClick={comingSoon}
-        className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white font-heading text-body-lg font-bold text-[#1f1f1f] transition hover:bg-zinc-100 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-      >
-        <GoogleIcon />
-        כבר במסע? התחברות עם Google
-      </button>
+      <div className="group relative">
+        <div
+          aria-hidden="true"
+          className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white font-heading text-body-lg font-bold text-[#1f1f1f] transition group-hover:bg-zinc-100 group-active:scale-[0.98]"
+        >
+          <GoogleIcon />
+          כבר במסע? התחברות עם Google
+        </div>
+        <GoogleButtonOverlay ready={googleStatus === "ready"} text="signin_with" />
+      </div>
 
-      <button
-        type="button"
-        onClick={comingSoon}
-        className="h-12 w-full rounded-full bg-ember font-heading text-body-lg font-bold text-canvas shadow-glow-ember transition hover:brightness-110 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
-      >
-        התחילו את המסע
-      </button>
+      <div className="group relative">
+        <div
+          aria-hidden="true"
+          className="flex h-12 w-full items-center justify-center rounded-full bg-ember font-heading text-body-lg font-bold text-canvas shadow-glow-ember transition group-hover:brightness-110 group-active:scale-[0.98]"
+        >
+          התחילו את המסע
+        </div>
+        <GoogleButtonOverlay ready={googleStatus === "ready"} text="continue_with" />
+      </div>
 
-      {notice && (
-        <p role="status" aria-live="polite" className="text-center text-body-md text-volt">
-          {notice}
+      {busy && (
+        <p role="status" aria-live="polite" className="text-center text-body-md text-text-secondary">
+          מתחבר...
+        </p>
+      )}
+
+      {message && !busy && (
+        <p role="alert" className="text-center text-body-md text-ember">
+          {message}
         </p>
       )}
     </div>
