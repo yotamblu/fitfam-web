@@ -1,4 +1,4 @@
-// Same-origin by default: next.config.ts forwards /backend/* to the API (see rewrites there).
+// Same-origin by default: app/backend/[...path]/route.ts forwards /backend/* to the API.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "/backend";
 
 export type CurrentUser = {
@@ -59,6 +59,8 @@ const MESSAGES: Record<string, string> = {
   invalid_token: "ההתחברות עם Google נכשלה. נסו שוב.",
   email_not_verified: "כתובת המייל בחשבון ה-Google לא מאומתת.",
   google_unavailable: "אי אפשר להגיע ל-Google כרגע. נסו שוב עוד רגע.",
+  api_unreachable: "השרת לא זמין כרגע. נסו שוב עוד רגע.",
+  forbidden_origin: "הבקשה נחסמה. רעננו את הדף ונסו שוב.",
 };
 
 /** A Hebrew, user-facing message for an error thrown while logging in. */
