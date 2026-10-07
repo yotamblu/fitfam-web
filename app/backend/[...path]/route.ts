@@ -5,8 +5,16 @@
 // reject any origin they do not list (and a tunnel/phone origin changes), and a rewrite cannot drop that header.
 // Here the request is re-sent from the server without it, after checking it came from this very site.
 
-// Server side only. Never exposed to the browser.
-const API_ORIGIN = process.env.API_ORIGIN ?? "http://localhost:8081";
+// Free API hosting can be asleep; give the first request time to wake it (serverless platforms cap this value).
+export const maxDuration = 60;
+const UPSTREAM_TIMEOUT_MS = 55_000;
+
+/** Server-side only. Required in production; falls back to the local API during development. */
+function apiOrigin(): string | null {
+  const configured = process.env.API_ORIGIN?.trim();
+  if (configured) return configured.replace(/\/+$/, "");
+  return process.env.NODE_ENV === "production" ? null : "http://localhost:8081";
+}
 
 // Least privilege: only these API areas are reachable through the customer app. Add prefixes as features need them.
 const ALLOWED_PREFIXES = ["auth/"];
@@ -33,10 +41,16 @@ function isSameSite(request: Request): boolean {
 async function proxy(request: Request, ctx: RouteContext<"/backend/[...path]">): Promise<Response> {
   const { path } = await ctx.params;
 
-  if (path.some((segment) => segment === "." || segment === "..")) return json(400, "invalid_request");
+  // A segment may never climb or split paths, however it was encoded (decoded here, e.g. "..%2Fadmin").
+  if (path.some((segment) => segment === "." || segment.includes("..") || /[\\/\u0000]/.test(segment))) {
+    return json(400, "invalid_request");
+  }
   const apiPath = path.map(encodeURIComponent).join("/");
   if (!ALLOWED_PREFIXES.some((prefix) => `${apiPath}/`.startsWith(prefix))) return json(404, "not_found");
   if (!isSameSite(request)) return json(403, "forbidden_origin");
+
+  const origin = apiOrigin();
+  if (!origin) return json(503, "api_not_configured");
 
   const headers = new Headers();
   for (const name of FORWARDED_REQUEST_HEADERS) {
@@ -47,13 +61,13 @@ async function proxy(request: Request, ctx: RouteContext<"/backend/[...path]">):
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   let upstream: Response;
   try {
-    upstream = await fetch(`${API_ORIGIN}/${apiPath}${new URL(request.url).search}`, {
+    upstream = await fetch(`${origin}/${apiPath}${new URL(request.url).search}`, {
       method: request.method,
       headers,
       body: hasBody ? await request.arrayBuffer() : undefined,
       redirect: "manual",
       cache: "no-store",
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
   } catch {
     return json(502, "api_unreachable");

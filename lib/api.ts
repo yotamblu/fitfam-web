@@ -60,6 +60,7 @@ const MESSAGES: Record<string, string> = {
   email_not_verified: "כתובת המייל בחשבון ה-Google לא מאומתת.",
   google_unavailable: "אי אפשר להגיע ל-Google כרגע. נסו שוב עוד רגע.",
   api_unreachable: "השרת לא זמין כרגע. נסו שוב עוד רגע.",
+  api_not_configured: "השרת לא מוגדר. פנו אלינו.",
   forbidden_origin: "הבקשה נחסמה. רעננו את הדף ונסו שוב.",
 };
 
