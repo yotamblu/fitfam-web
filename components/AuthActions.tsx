@@ -78,7 +78,7 @@ export default function AuthActions() {
       <div className="group relative">
         <div
           aria-hidden="true"
-          className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white font-heading text-body-lg font-bold text-[#1f1f1f] transition group-hover:bg-zinc-100 group-active:scale-[0.98]"
+          className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white font-heading text-body-lg font-bold text-[#1f1f1f] transition-colors group-hover:bg-zinc-100 group-active:scale-[0.985]"
         >
           <GoogleIcon />
           כבר במסע? התחברות עם Google
@@ -89,7 +89,7 @@ export default function AuthActions() {
       <div className="group relative">
         <div
           aria-hidden="true"
-          className="flex h-12 w-full items-center justify-center rounded-full bg-ember font-heading text-body-lg font-bold text-canvas shadow-glow-ember transition group-hover:brightness-110 group-active:scale-[0.98]"
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-ember font-heading text-body-lg font-bold text-canvas transition group-hover:brightness-110 group-active:scale-[0.985]"
         >
           התחילו את המסע
         </div>

@@ -1,4 +1,4 @@
-type IconProps = { className?: string };
+type IconProps = { className?: string; filled?: boolean };
 
 const base = {
   width: 24,
@@ -61,19 +61,19 @@ export const ChevronDownIcon = ({ className }: IconProps) => (
     <path d="m6 9 6 6 6-6" />
   </svg>
 );
-export const FlameIcon = ({ className }: IconProps) => (
-  <svg {...base} className={className} fill="currentColor" stroke="none">
-    <path d="M12 2c.6 3.2-1.2 4.9-2.7 6.7C7.7 10.6 6 12.4 6 15.2 6 18.9 8.7 22 12 22s6-3.1 6-6.8c0-2.2-1-3.9-2.2-5.2-.3 1.3-1 2.2-1.9 2.6.5-3-.4-6.9-1.9-10.6z" />
+export const FlameIcon = ({ className, filled }: IconProps) => (
+  <svg {...base} className={className} fill={filled ? "currentColor" : "none"}>
+    <path d="M12 3c.5 3-1.2 4.6-2.7 6.4C7.8 11.2 6.5 12.8 6.5 15.3 6.5 18.6 8.9 21 12 21s5.5-2.4 5.5-5.7c0-2-.9-3.5-2-4.7-.3 1.2-.9 2-1.8 2.4.4-2.7-.4-6.2-1.7-10z" />
   </svg>
 );
-export const BoltIcon = ({ className }: IconProps) => (
-  <svg {...base} className={className} fill="currentColor" stroke="none">
-    <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+export const BoltIcon = ({ className, filled }: IconProps) => (
+  <svg {...base} className={className} fill={filled ? "currentColor" : "none"}>
+    <path d="M13 3 5 13.5h6L10 21l8-10.5h-6z" />
   </svg>
 );
-export const StarIcon = ({ className }: IconProps) => (
-  <svg {...base} className={className} fill="currentColor" stroke="none">
-    <path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" />
+export const StarIcon = ({ className, filled }: IconProps) => (
+  <svg {...base} className={className} fill={filled ? "currentColor" : "none"}>
+    <path d="m12 3 2.7 5.6 6.1.8-4.5 4.3 1.1 6.1L12 16.8 6.6 19.8l1.1-6.1-4.5-4.3 6.1-.8z" />
   </svg>
 );
 export const TrophyIcon = ({ className }: IconProps) => (
@@ -84,5 +84,15 @@ export const TrophyIcon = ({ className }: IconProps) => (
 export const LogoutIcon = ({ className }: IconProps) => (
   <svg {...base} className={className}>
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </svg>
+);
+export const ChevronLeftIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="m15 6-6 6 6 6" />
+  </svg>
+);
+export const ChevronRightIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="m9 6 6 6-6 6" />
   </svg>
 );

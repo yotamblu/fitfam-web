@@ -8,7 +8,7 @@ import "./globals.css";
 const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
-  weight: ["600", "700", "800", "900"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const assistant = Assistant({

@@ -22,10 +22,8 @@ export default function RoadmapHud({ className = "" }: { className?: string }) {
               role="tab"
               aria-selected={selected}
               onClick={() => setActiveSlug(plan.planSlug)}
-              className={`h-9 shrink-0 rounded-full border-[3px] px-4 font-heading text-[13px] font-extrabold transition active:translate-y-[3px] ${
-                selected
-                  ? "border-white text-[#1a1208] shadow-[0_4px_0_rgba(0,0,0,0.4)]"
-                  : "border-white/45 bg-black/30 text-white/85 shadow-[0_4px_0_rgba(0,0,0,0.3)] hover:bg-black/45"
+              className={`h-10 shrink-0 rounded-full border-2 px-4 font-heading text-[13px] font-bold transition-colors duration-200 ${
+                selected ? "border-white text-[#1a1208]" : "border-white/35 bg-black/25 text-white/85 hover:bg-black/40"
               }`}
               style={selected ? { backgroundColor: "var(--chrome-accent)" } : undefined}
             >

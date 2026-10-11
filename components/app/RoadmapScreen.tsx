@@ -47,7 +47,7 @@ export default function RoadmapScreen() {
 
   return (
     <>
-      <RoadmapHud className="sticky top-4 z-30 hidden rounded-full border-[3px] border-white/70 bg-black/40 p-2 backdrop-blur-xl lg:flex" />
+      <RoadmapHud className="sticky top-4 z-30 hidden rounded-full bg-black/40 p-1.5 backdrop-blur-xl lg:flex" />
 
       {plans.length === 0 && (
         <p className="mt-4 rounded-2xl border-[3px] border-white/60 bg-black/40 p-6 text-center text-body-md text-white">
@@ -77,8 +77,7 @@ function Summary({ roadmap }: { roadmap: Roadmap }) {
   const progress = levelProgress(roadmap);
   const next = nextUp(roadmap);
   return (
-    <section className="ff-rise-in relative overflow-hidden rounded-3xl border-[3px] border-white/75 bg-gradient-to-b from-black/40 to-black/70 p-5 shadow-[0_8px_0_rgba(0,0,0,0.35)] backdrop-blur-xl [animation-delay:120ms]">
-      <div aria-hidden="true" className="pointer-events-none absolute -top-16 -start-10 size-44 rounded-full opacity-40 blur-[70px]" style={{ backgroundColor: "var(--chrome-accent)" }} />
+    <section className="ff-rise-in relative overflow-hidden rounded-2xl bg-black/45 p-5 backdrop-blur-xl [animation-delay:120ms]">
       <div className="relative flex items-center gap-4">
         <ProgressRing value={ratio(progress.done, progress.total)} size={88} stroke={9} tone="volt">
           <span dir="ltr" className="font-heading text-headline-sm font-extrabold text-white">
@@ -87,7 +86,7 @@ function Summary({ roadmap }: { roadmap: Roadmap }) {
         </ProgressRing>
         <div className="min-w-0 text-white">
           <p className="text-label-md font-bold opacity-80">הרמה הנוכחית</p>
-          <p className="font-heading text-headline-md font-extrabold leading-6">{progress.levelName}</p>
+          <p className="font-heading text-headline-md font-bold leading-6">{progress.levelName}</p>
           <p className="mt-1 text-label-md font-bold opacity-80">
             רמה {roadmap.currentLevelNumber} מתוך {roadmap.levels.length}
           </p>

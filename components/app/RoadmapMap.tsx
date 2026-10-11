@@ -157,7 +157,7 @@ export default function RoadmapMap({ roadmap, rewards }: { roadmap: Roadmap; rew
   return (
     <div
       ref={mapRef}
-      className="relative -mx-gutter w-auto overflow-hidden bg-canvas [container-type:inline-size] md:mx-auto md:max-w-[620px] md:rounded-3xl md:border-[3px] md:border-white/70 md:shadow-2xl"
+      className="relative -mx-gutter w-auto overflow-hidden bg-canvas [container-type:inline-size] md:mx-auto md:max-w-[620px] md:rounded-3xl md:border-2 md:border-white/40"
       style={{ aspectRatio: `${VB_W} / ${height}` }}
     >
       <svg viewBox={`0 0 ${VB_W} ${height}`} className="absolute inset-0 size-full" aria-hidden="true" preserveAspectRatio="xMidYMin slice">
@@ -227,10 +227,10 @@ export default function RoadmapMap({ roadmap, rewards }: { roadmap: Roadmap; rew
       )}
 
       {allDone && (
-        <div className="ff-pop-in absolute inset-x-0 flex justify-center" style={{ top: pct(height - 74, height) }}>
+        <div className="ff-fade-in absolute inset-x-0 flex justify-center" style={{ top: pct(height - 74, height) }}>
           <div className="flex items-center gap-2 rounded-full border-2 border-white/80 bg-gradient-to-b from-[#ffd54a] to-[#ff9d1c] px-5 py-2.5 font-heading text-body-lg font-extrabold text-[#4a2a00] shadow-lg">
             <StarIcon className="size-5" />
-            סיימתם את כל המסלול!
+            סיימתם את כל המסלול
           </div>
         </div>
       )}
@@ -239,7 +239,7 @@ export default function RoadmapMap({ roadmap, rewards }: { roadmap: Roadmap; rew
         <button
           type="button"
           onClick={() => currentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-          className="ff-pop-in fixed bottom-24 left-1/2 z-30 flex h-11 -translate-x-1/2 items-center gap-2 rounded-full bg-ember px-5 font-heading text-body-md font-bold text-canvas shadow-glow-ember lg:bottom-8"
+          className="ff-pop-in fixed bottom-24 left-1/2 z-30 flex h-11 -translate-x-1/2 items-center gap-2 rounded-xl bg-ember px-5 font-heading text-body-md font-bold text-canvas shadow-lg lg:bottom-8"
         >
           <PlayIcon className="size-3.5" />
           חזרה למקום שלי
@@ -263,17 +263,17 @@ function Banner({ point, total, index, theme }: { point: Extract<Pt, { kind: "ba
     <div className="absolute left-1/2 z-10 w-[90%] -translate-x-1/2 -translate-y-1/2" style={{ top: pct(point.y, total) }}>
       <div ref={ref} className={`ff-reveal ${seen ? "is-in" : ""}`} style={{ transitionDelay: `${Math.min(index, 3) * 60}ms` }}>
         <div
-          className={`relative flex items-center justify-between gap-3 px-8 py-3 shadow-[0_6px_0_rgba(0,0,0,0.28)] ${dim ? "saturate-[0.35]" : ""}`}
+          className={`relative flex items-center justify-between gap-3 px-8 py-3 ${dim ? "saturate-[0.35]" : ""}`}
           style={{
             background: `linear-gradient(180deg, ${theme.ribbon[0]}, ${theme.ribbon[1]})`,
             color: theme.ribbonText,
             clipPath: "polygon(0 0, 100% 0, calc(100% - 16px) 50%, 100% 100%, 0 100%, 16px 50%)",
           }}
         >
-          <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1/2 bg-white/20" />
+          
           <div className="relative min-w-0">
             <p className="text-label-md font-bold opacity-80">רמה {level.levelNumber}</p>
-            <h2 className="truncate font-heading text-headline-sm font-extrabold leading-5">{name}</h2>
+            <h2 className="truncate font-heading text-headline-sm font-bold leading-5">{name}</h2>
           </div>
           <div className="relative flex shrink-0 items-center gap-2">
             {level.workouts.length > 0 && (
@@ -337,21 +337,22 @@ function Stop({
 
   const node = (
     <span
-      className={`relative flex items-center justify-center rounded-full border-[3px] border-white/85 font-heading font-extrabold text-white transition-transform duration-150 ${
+      className={`relative flex items-center justify-center rounded-full border-[3px] border-white/80 font-heading font-bold text-white transition-transform duration-150 ${
         openable ? "active:translate-y-[5px]" : ""
       } ${workout.state === "skipped" ? "opacity-50" : ""}`}
       style={
         {
           width: size,
           height: size,
-          background: `radial-gradient(circle at 34% 24%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 42%), ${face}`,
-          boxShadow: `0 7px 0 ${edge}, 0 13px 16px rgba(0,0,0,0.38), inset 0 -6px 10px rgba(0,0,0,0.18)`,
+          backgroundColor: face,
+          boxShadow: `0 6px 0 ${edge}`,
           fontSize: challenge ? "clamp(28px, 9cqw, 44px)" : "clamp(24px, 7.6cqw, 36px)",
-          textShadow: "0 2px 0 rgba(0,0,0,0.35)",
+          textShadow: "0 1px 0 rgba(0,0,0,0.3)",
         } as CSSProperties
       }
     >
-      {challenge ? <FlagIcon className="size-[44%]" /> : <span dir="ltr">{point.number}</span>}
+      <span aria-hidden="true" className="pointer-events-none absolute start-[16%] top-[11%] h-[16%] w-[32%] -rotate-[24deg] rounded-full bg-white/30" />
+      {challenge ? <FlagIcon className="size-[44%]" /> : <span dir="ltr" className="relative">{point.number}</span>}
       {workout.state === "done" && (
         <span className="absolute -end-1 -top-1 flex size-[34%] items-center justify-center rounded-full border-2 border-white bg-[#22c55e] text-white shadow">
           <CheckIcon className="size-[62%]" />
@@ -364,8 +365,7 @@ function Stop({
       )}
       {challenge && workout.state !== "locked" && workout.state !== "skipped" && (
         <>
-          <StarIcon className="ff-bob absolute -start-1 -top-2 size-5 text-[#ffd54a] drop-shadow" />
-          <StarIcon className="ff-bob absolute -end-1 -top-3 size-4 text-white drop-shadow [animation-delay:0.4s]" />
+          <StarIcon filled className="absolute -start-1 -top-2 size-5 text-[#ffd54a]" />
         </>
       )}
     </span>
@@ -378,11 +378,9 @@ function Stop({
           {isCurrent && (
             <>
               <span aria-hidden="true" className="ff-ring pointer-events-none absolute rounded-full border-[3px] border-white" style={{ width: size, height: size }} />
-              <span aria-hidden="true" className="ff-ring pointer-events-none absolute rounded-full border-[3px] border-white/60 [animation-delay:1.2s]" style={{ width: size, height: size }} />
-              <span aria-hidden="true" className="ff-halo pointer-events-none absolute -z-10 rounded-full bg-white/40 blur-2xl" style={{ width: `calc(${size} * 1.7)`, height: `calc(${size} * 1.7)` }} />
-              <div ref={refs?.watchRef} className="ff-bob absolute -top-12 z-10 whitespace-nowrap rounded-xl border-2 border-ember bg-white px-3 py-1.5 font-heading text-body-md font-extrabold text-canvas shadow-lg">
-                {challenge ? "לאתגר!" : "מתחילים!"}
-                <span aria-hidden="true" className="absolute -bottom-[7px] left-1/2 size-3 -translate-x-1/2 rotate-45 border-b-2 border-e-2 border-ember bg-white" />
+              <div ref={refs?.watchRef} className="ff-bob absolute -top-11 z-10 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 font-heading text-body-md font-bold text-canvas">
+                {challenge ? "האתגר" : "כאן"}
+                <span aria-hidden="true" className="absolute -bottom-1 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-white" />
               </div>
             </>
           )}
@@ -401,14 +399,11 @@ function Stop({
           )}
         </div>
 
-        <div className="flex w-[38cqw] max-w-48 flex-col items-center gap-1 text-center">
-          <p className={`line-clamp-2 rounded-lg bg-black/50 px-2 py-0.5 font-heading text-label-md font-bold leading-4 text-white backdrop-blur-sm ${muted ? "opacity-70" : ""}`}>
-            {workout.titleHe ?? "אימון"}
-          </p>
+        <div className={`flex w-[38cqw] max-w-48 flex-col items-center gap-0.5 rounded-lg bg-black/55 px-2 py-1 text-center ${muted ? "opacity-70" : ""}`}>
+          <p className="line-clamp-2 font-heading text-label-md font-bold leading-4 text-white">{workout.titleHe ?? "אימון"}</p>
           {workout.state !== "done" && workout.state !== "skipped" && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-label-md font-extrabold text-[#ffd54a]">
-              <BoltIcon className="size-3" />
-              <span dir="ltr">+{points}</span>
+            <span dir="ltr" className="text-label-md font-bold tabular-nums text-[#ffd54a]">
+              +{points}
             </span>
           )}
         </div>

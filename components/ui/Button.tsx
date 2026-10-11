@@ -4,16 +4,16 @@ type Variant = "primary" | "secondary" | "ghost" | "volt" | "game";
 type Size = "sm" | "md" | "lg";
 
 const VARIANTS: Record<Variant, string> = {
-  primary: "bg-ember text-canvas shadow-glow-ember hover:brightness-110",
-  volt: "bg-volt text-canvas shadow-glow-volt hover:brightness-110",
-  secondary: "border border-border-emphasis bg-surface-raised text-text-primary hover:bg-surface",
-  ghost: "text-text-secondary hover:bg-surface-raised hover:text-text-primary",
+  primary: "bg-ember text-canvas hover:brightness-110",
+  volt: "bg-volt text-canvas hover:brightness-110",
+  secondary: "bg-white/[0.07] text-text-primary hover:bg-white/[0.11]",
+  ghost: "text-text-secondary hover:bg-white/[0.06] hover:text-text-primary",
   // the chunky glossy button of the roadmap world (white rim, hard bottom edge that squashes when pressed)
   game: "border-[3px] border-white/85 bg-gradient-to-b from-[#ff8a5c] to-[#ec4a1f] text-white [text-shadow:0_2px_0_rgba(0,0,0,0.3)] shadow-[0_6px_0_#8f2a10] active:translate-y-[4px] active:shadow-[0_2px_0_#8f2a10] hover:brightness-110",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-9 px-4 text-body-md",
+  sm: "h-10 px-4 text-body-md",
   md: "h-11 px-5 text-body-md",
   lg: "h-12 px-6 text-body-lg",
 };
@@ -29,8 +29,9 @@ export function buttonClasses({
   fullWidth?: boolean;
 } = {}): string {
   return [
-    "inline-flex items-center justify-center gap-2 rounded-full font-heading font-bold transition",
-    "active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60",
+    "inline-flex items-center justify-center gap-2 font-heading font-bold transition duration-200 ease-out",
+    variant === "game" ? "rounded-full" : "rounded-xl",
+    "active:scale-[0.985] disabled:pointer-events-none disabled:opacity-60",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember",
     VARIANTS[variant],
     SIZES[size],

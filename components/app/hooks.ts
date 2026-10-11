@@ -7,7 +7,7 @@ function prefersReducedMotion(): boolean {
 }
 
 /** Counts from 0 up to `target` once (ease-out), for scores and level numbers. */
-export function useCountUp(target: number, durationMs = 900): number {
+export function useCountUp(target: number, durationMs = 600): number {
   const [value, setValue] = useState(0);
   useEffect(() => {
     if (prefersReducedMotion() || target === 0) {

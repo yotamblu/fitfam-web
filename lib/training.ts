@@ -37,6 +37,20 @@ export function clock(seconds: number): string {
   return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
 }
 
+/** The one big number of a target and its unit, for the player ("10" + "חזרות", "3:00", "400" + "מטר"). */
+export function targetParts(target: StepTarget): { value: string; unit: string } {
+  if (target.reps !== null) return { value: target.repsMax !== null ? `${target.reps}–${target.repsMax}` : String(target.reps), unit: "חזרות" };
+  if (target.distanceM !== null) {
+    return target.distanceM >= 1000 && target.distanceM % 100 === 0
+      ? { value: String(target.distanceM / 1000), unit: "ק״מ" }
+      : { value: String(target.distanceM), unit: "מטר" };
+  }
+  if (target.durationSec !== null) return target.durationSec >= 60 ? { value: clock(target.durationSec), unit: "" } : { value: String(target.durationSec), unit: "שניות" };
+  if (target.calories !== null) return { value: String(target.calories), unit: "קלוריות" };
+  if (target.capSec !== null) return { value: clock(target.capSec), unit: "תקרת זמן" };
+  return { value: "MAX", unit: "עד כשל" };
+}
+
 /** The main number(s) of a target as short text, e.g. "10 חזרות" or "3 דק׳". */
 export function targetHeadline(target: StepTarget): string {
   if (target.reps !== null) {

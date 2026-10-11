@@ -18,10 +18,10 @@ export default function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={max}
       aria-valuenow={value}
-      className="h-2 w-full overflow-hidden rounded-full bg-well"
+      className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
     >
       <div
-        className={`h-full w-full origin-right rounded-full transition-transform duration-500 ${
+        className={`h-full w-full origin-right rounded-full transition-transform duration-700 ease-out ${
           tone === "volt" ? "bg-volt" : "bg-ember"
         }`}
         style={{ transform: `scaleX(${ratio})` }}

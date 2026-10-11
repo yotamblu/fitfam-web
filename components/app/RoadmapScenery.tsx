@@ -297,7 +297,7 @@ function track(top: number, bottom: number, w: number, v: Variant, idx: number):
     );
   }
   // trees and floodlights on the grass at both sides
-  for (let slot = 0, y = top + 90; y < bottom; slot++, y += 120) {
+  for (let slot = 0, y = top + 90; y < bottom; slot++, y += 170) {
     const x = slot % 2 === 0 ? 20 + hash(slot + idx, 10) : w - 20 - hash(slot + idx, 10);
     out.push(<Tree key={`tr${slot}`} x={x} y={y} s={0.7 + hash(slot, 3) / 10} a={grassTree[0]} b={grassTree[1]} />);
   }
@@ -379,7 +379,7 @@ function gym(top: number, bottom: number, w: number, v: Variant, idx: number): R
     out.push(<rect key={`z${i}`} x="64" y={y} width={w - 128} height="120" rx="14" fill="none" stroke={v === 2 ? "#46e6c4" : "#fff"} strokeOpacity={v === 2 ? 0.55 : 0.4} strokeWidth="3" strokeDasharray="14 10" />);
   }
   // equipment along both sides, top-down
-  for (let slot = 0, y = top + 130; y < bottom - 20; slot++, y += 138) {
+  for (let slot = 0, y = top + 130; y < bottom - 20; slot++, y += 180) {
     const left = slot % 2 === 0;
     const x = left ? 38 + hash(slot + idx, 22) : w - 38 - hash(slot * 3 + idx, 22);
     switch ((slot + idx) % 7) {
@@ -428,7 +428,7 @@ function park(top: number, bottom: number, w: number, v: Variant, idx: number): 
   for (let i = 0, y = top + 120; y < bottom; i++, y += 210) {
     out.push(<ellipse key={`g${i}`} cx={i % 2 === 0 ? 60 : w - 60} cy={y} rx="46" ry="30" fill={pick(["#d9c9a3", "#c9a77a", "#3a3f44"], v)} opacity="0.7" />);
   }
-  for (let slot = 0, y = top + 130; y < bottom - 20; slot++, y += 132) {
+  for (let slot = 0, y = top + 130; y < bottom - 20; slot++, y += 176) {
     const left = slot % 2 === 0;
     const x = left ? 40 + hash(slot + idx, 24) : w - 40 - hash(slot * 5 + idx, 24);
     switch ((slot + idx) % 6) {

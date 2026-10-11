@@ -20,7 +20,6 @@ export default function Splash() {
         aria-hidden="true"
         className="animate-splash-out fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-canvas"
       >
-        <div className="animate-splash-glow absolute size-[420px] rounded-full bg-ember/30 blur-[100px]" />
         <Image
           src="/logo-transparent.png"
           alt=""

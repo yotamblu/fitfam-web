@@ -88,10 +88,12 @@ export default function TabShell({ children }: { children: ReactNode }) {
             : vars
         }
       >
-        {/* ambient glow in the accent colour (static: the classic orange, or the venue colour on the roadmap), the sticky header wears the same colour as the status strip, so the top edge has no seam */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-80 overflow-hidden">
-          <div className="absolute -top-44 left-1/2 size-[520px] -translate-x-1/2 rounded-full opacity-25 blur-[120px] transition-colors duration-700" style={{ backgroundColor: "var(--chrome-accent)" }} />
-        </div>
+        {/* a plain static fade from the status-strip colour into the page: no glow, no blur */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-56 transition-colors duration-700"
+          style={{ backgroundImage: "linear-gradient(to bottom, color-mix(in srgb, var(--chrome-top) 55%, transparent), transparent)" }}
+        />
 
         {/* desktop side bar */}
         <aside className="sticky top-0 z-30 hidden h-dvh w-72 shrink-0 flex-col gap-6 border-s p-6 backdrop-blur-xl transition-colors duration-700 lg:flex" style={bottomBar}>

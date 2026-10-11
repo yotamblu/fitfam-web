@@ -67,7 +67,7 @@ export function ProgressRing({
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={circumference * (1 - Math.min(1, Math.max(0, value)))}
-          style={{ transition: "stroke-dashoffset 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s", filter: "drop-shadow(0 0 6px rgba(255,86,55,0.45))" }}
+          style={{ transition: "stroke-dashoffset 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s" }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">{children}</div>
@@ -121,7 +121,6 @@ export function Confetti({ pieces = 36 }: { pieces?: number }) {
 export function BrandLoader({ label = "טוען" }: { label?: string }) {
   return (
     <main className="relative flex min-h-dvh flex-col items-center justify-center gap-6 overflow-hidden px-gutter">
-      <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/3 size-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ember/20 blur-[110px] ff-halo" />
       <div className="relative flex size-28 items-center justify-center">
         <span aria-hidden="true" className="ff-ring absolute inset-0 rounded-full border-2 border-ember/60" />
         <span aria-hidden="true" className="ff-ring absolute inset-0 rounded-full border-2 border-ember/40 [animation-delay:1.2s]" />

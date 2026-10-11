@@ -7,8 +7,8 @@ import { api, describeError, type AttemptResult, type CustomerWorkout, type Road
 import { rankTitle } from "@/lib/gamify";
 import { SPORT_LABELS, buildPreview, nextUp } from "@/lib/training";
 import Button, { buttonClasses } from "../ui/Button";
-import Chip from "../ui/Chip";
-import { BoltIcon, CheckIcon, FlagIcon, FlameIcon, PlayIcon, TrophyIcon } from "./icons";
+import { CheckIcon, FlagIcon, PlayIcon } from "./icons";
+import { Card, Meta, RowList } from "./primitives";
 import { useSession } from "./Session";
 import StackShell from "./StackShell";
 import { Confetti, CountUp, Skeleton } from "./ui";
@@ -76,7 +76,7 @@ export default function WorkoutScreen() {
   return (
     <StackShell title={workout?.titleHe ?? "אימון"} backHref="/roadmap" backLabel="למסלול">
       {error && (
-        <p role="alert" className="ff-fade-in rounded-xl border border-ember/40 bg-ember/10 p-4 text-body-md text-ember">
+        <p role="alert" className="ff-fade-in rounded-xl bg-ember/10 p-4 text-body-md text-ember">
           {error}
         </p>
       )}
@@ -84,53 +84,44 @@ export default function WorkoutScreen() {
       {!workout && !error && <WorkoutSkeleton />}
 
       {workout && (
-        <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-10">
-          <div className="flex min-w-0 flex-col gap-5">
-            <section className="ff-rise-in flex flex-col gap-3">
-              <div className="flex flex-wrap gap-1.5">
-                {isChallenge && (
-                  <Chip tone="ember">
-                    <FlagIcon className="size-3.5" />
-                    אתגר מעבר רמה
-                  </Chip>
-                )}
-                <Chip tone="info">{SPORT_LABELS[workout.sport]}</Chip>
-                {workout.estMinutes !== null && <Chip>{workout.estMinutes} דק׳</Chip>}
-                {done && (
-                  <Chip tone="volt">
-                    <CheckIcon className="size-3.5" />
-                    הושלם
-                  </Chip>
-                )}
-              </div>
-              <h2 className="font-heading text-display-hero-mobile font-extrabold lg:text-display-hero">{workout.titleHe ?? "אימון"}</h2>
-              {workout.descriptionHe && <p className="text-body-lg text-text-secondary">{workout.descriptionHe}</p>}
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-12">
+          <div className="flex min-w-0 flex-col gap-6">
+            <section className="ff-rise-in">
+              <Meta
+                items={[
+                  isChallenge ? "אתגר מעבר רמה" : SPORT_LABELS[workout.sport],
+                  workout.estMinutes !== null && `${workout.estMinutes} דק׳`,
+                  done && "הושלם",
+                ]}
+              />
+              <h2 className="mt-2 font-heading text-[30px] font-bold leading-10 lg:text-[40px] lg:leading-[48px]">{workout.titleHe ?? "אימון"}</h2>
+              {workout.descriptionHe && <p className="mt-2 text-body-lg text-text-secondary">{workout.descriptionHe}</p>}
             </section>
 
             {isChallenge && workout.goalHe && (
-              <section className="ff-pop-in rounded-2xl border border-ember/40 bg-ember/10 p-5 [animation-delay:120ms]">
+              <Card className="ff-rise-in border-s-4 border-ember p-5 [animation-delay:60ms]">
                 <p className="text-label-md font-semibold text-ember">המטרה</p>
-                <p className="mt-1 font-heading text-headline-md font-bold">{workout.goalHe}</p>
-              </section>
+                <p className="mt-1 font-heading text-headline-sm font-bold">{workout.goalHe}</p>
+              </Card>
             )}
 
-            <section className="flex flex-col gap-5" aria-label="תכנית האימון">
+            <section className="flex flex-col gap-6" aria-label="תכנית האימון">
               {preview.map((section, si) => (
-                <div key={si} className="flex flex-col gap-2">
-                  {section.title && <h3 className="font-heading text-headline-sm font-bold">{section.title}</h3>}
-                  <ul className="flex flex-col gap-2">
+                <div key={si} className="flex flex-col gap-3">
+                  {section.title && <h3 className="font-heading text-body-lg font-bold">{section.title}</h3>}
+                  <RowList>
                     {section.rows.map((row, ri) => (
-                      <li
-                        key={row.key}
-                        className="ff-slide-in flex flex-col gap-2 rounded-xl border border-border bg-surface px-4 py-3.5"
-                        style={{ animationDelay: `${Math.min(si * 4 + ri, 10) * 55 + 150}ms` }}
-                      >
+                      <li key={row.key} className="ff-slide-in flex flex-col gap-1 px-4 py-3.5" style={{ animationDelay: `${Math.min(ri, 4) * 40}ms` }}>
                         <span className="font-heading text-body-lg font-bold">{row.name}</span>
                         <span className="text-body-md text-text-secondary">{row.summary}</span>
-                        {row.youtubeId && <Video youtubeId={row.youtubeId} title={row.name} />}
+                        {row.youtubeId && (
+                          <div className="mt-2">
+                            <Video youtubeId={row.youtubeId} title={row.name} />
+                          </div>
+                        )}
                       </li>
                     ))}
-                  </ul>
+                  </RowList>
                 </div>
               ))}
               {preview.length === 0 && <p className="text-body-md text-text-muted">האימון עוד ריק.</p>}
@@ -138,17 +129,14 @@ export default function WorkoutScreen() {
           </div>
 
           {done ? (
-            <p className="ff-pop-in rounded-xl border border-volt/30 bg-volt/10 p-4 text-center text-body-md text-volt lg:sticky lg:top-8">
-              סיימתם את האימון הזה. אפשר לקרוא אותו, אבל לא לעשות אותו שוב.
-            </p>
+            <p className="rounded-xl bg-volt/10 p-4 text-center text-body-md text-volt lg:sticky lg:top-8">סיימתם את האימון הזה. אפשר לקרוא אותו, אבל לא לעשות אותו שוב.</p>
           ) : (
-            <div className="sticky bottom-0 z-20 -mx-gutter flex flex-col gap-3 border-t border-border bg-canvas/90 px-gutter py-4 backdrop-blur-xl lg:static lg:top-8 lg:mx-0 lg:rounded-2xl lg:border lg:bg-surface-raised lg:p-5 lg:sticky lg:bottom-auto">
+            <div className="sticky bottom-0 z-20 -mx-gutter flex flex-col gap-3 bg-canvas/95 px-gutter py-4 backdrop-blur-xl lg:static lg:top-8 lg:mx-0 lg:rounded-2xl lg:bg-surface-raised lg:p-5 lg:sticky lg:bottom-auto">
               {points !== null && (
-                <p className="hidden items-center justify-between lg:flex">
+                <p className="hidden items-baseline justify-between lg:flex">
                   <span className="text-body-md text-text-secondary">פרס על האימון</span>
-                  <span className="flex items-center gap-1 font-heading text-headline-sm font-extrabold text-volt">
-                    <BoltIcon className="size-5" />
-                    <span dir="ltr">+{points}</span>
+                  <span dir="ltr" className="font-heading text-headline-sm font-bold tabular-nums text-volt">
+                    +{points}
                   </span>
                 </p>
               )}
@@ -170,7 +158,7 @@ export default function WorkoutScreen() {
                       })
                     }
                   >
-                    עברתי!
+                    עברתי
                   </Button>
                   <Button
                     variant="secondary"
@@ -213,44 +201,42 @@ export default function WorkoutScreen() {
 
 function WorkoutSkeleton() {
   return (
-    <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10" role="status" aria-label="טוען את האימון">
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-12" role="status" aria-label="טוען את האימון">
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <Skeleton className="h-7 w-20 !rounded-md" />
-          <Skeleton className="h-7 w-16 !rounded-md" />
-        </div>
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-5 w-1/2" />
-        {Array.from({ length: 4 }, (_, i) => (
-          <Skeleton key={i} className="h-20" style={{ animationDelay: `${i * 120}ms` }} />
-        ))}
+        <Skeleton className="h-4 w-40 !rounded-md" />
+        <Skeleton className="h-10 w-3/4 !rounded-lg" />
+        <Skeleton className="h-4 w-1/2 !rounded-md" />
+        <Skeleton className="mt-2 h-56" />
       </div>
-      <Skeleton className="hidden h-44 lg:block" />
+      <Skeleton className="hidden h-40 lg:block" />
     </div>
   );
 }
 
-function RewardBadge({ reward }: { reward: Reward }) {
+/** What the workout earned: a quiet summary, with the points, a level-up line when there is one, and the next step. */
+function RewardRows({ reward }: { reward: Reward }) {
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex w-full flex-col divide-y divide-white/[0.06] overflow-hidden rounded-2xl bg-surface-raised text-start">
       {reward.xpGained > 0 && (
-        <p className="ff-pop-in flex items-center gap-2 rounded-full bg-volt/15 px-5 py-2 font-heading text-headline-md font-extrabold text-volt [animation-delay:350ms]">
-          <BoltIcon className="size-6" />
-          <span className="flex">
+        <p className="ff-rise-in flex items-baseline justify-between px-4 py-3.5 [animation-delay:150ms]">
+          <span className="text-body-md text-text-secondary">נקודות</span>
+          <span className="flex font-heading text-headline-sm font-bold text-volt">
             +<CountUp value={reward.xpGained} />
           </span>
-          <span className="text-body-lg">נקודות</span>
         </p>
       )}
       {reward.levelUp !== null && (
-        <p className="ff-pop-in rounded-2xl border border-ember/50 bg-ember/10 px-5 py-3 font-heading text-headline-sm font-extrabold text-ember shadow-glow-ember [animation-delay:700ms]">
-          עליתם לרמה {reward.levelUp} · {rankTitle(reward.levelUp)}
+        <p className="ff-rise-in flex items-baseline justify-between px-4 py-3.5 [animation-delay:250ms]">
+          <span className="text-body-md text-text-secondary">רמה חדשה</span>
+          <span className="font-heading text-body-lg font-bold">
+            {reward.levelUp} · {rankTitle(reward.levelUp)}
+          </span>
         </p>
       )}
       {reward.weeklyStreak !== null && reward.weeklyStreak > 0 && (
-        <p className="ff-rise-in flex items-center gap-1.5 text-body-md text-text-secondary [animation-delay:900ms]">
-          <FlameIcon className="ff-flame size-4 text-ember" />
-          {reward.weeklyStreak} שבועות ברצף
+        <p className="ff-rise-in flex items-baseline justify-between px-4 py-3.5 [animation-delay:350ms]">
+          <span className="text-body-md text-text-secondary">רצף שבועי</span>
+          <span className="font-heading text-body-lg font-bold">{reward.weeklyStreak} שבועות</span>
         </p>
       )}
     </div>
@@ -261,26 +247,25 @@ function OutcomeView({ outcome, onBack }: { outcome: Outcome; onBack: () => void
   if (outcome.kind === "completed") {
     const next = nextUp(outcome.roadmap);
     return (
-      <StackShell title="כל הכבוד" backHref="/home" backLabel="לבית">
-        <Confetti />
-        <section className="mx-auto flex w-full max-w-md flex-col items-center gap-5 pt-8 text-center lg:pt-16">
-          <span className="ff-pop-in relative flex size-24 items-center justify-center rounded-full bg-volt text-canvas shadow-glow-volt">
-            <span aria-hidden="true" className="ff-ring absolute inset-0 rounded-full border-2 border-volt" />
-            <CheckIcon className="size-12" />
+      <StackShell title="האימון הושלם" backHref="/home" backLabel="לבית">
+        {outcome.reward.levelUp !== null && <Confetti />}
+        <section className="mx-auto flex w-full max-w-md flex-col items-center gap-5 pt-10 text-center lg:pt-16">
+          <span className="ff-pop-in flex size-16 items-center justify-center rounded-full bg-volt text-canvas">
+            <CheckIcon className="size-8" />
           </span>
-          <h2 className="ff-rise-in font-heading text-display-hero-mobile font-extrabold [animation-delay:200ms] lg:text-display-hero">האימון הושלם!</h2>
-          <RewardBadge reward={outcome.reward} />
+          <h2 className="ff-rise-in font-heading text-[30px] font-bold leading-10 [animation-delay:80ms]">האימון הושלם</h2>
+          <RewardRows reward={outcome.reward} />
           {next ? (
-            <div className="ff-rise-in flex w-full flex-col gap-3 [animation-delay:1000ms]">
-              <p className="text-body-lg text-text-secondary">
-                הבא בתור: <span className="font-bold text-text-primary">{next.workout.titleHe ?? "אימון"}</span>
+            <div className="ff-rise-in flex w-full flex-col gap-3 [animation-delay:450ms]">
+              <p className="text-body-md text-text-secondary">
+                הבא בתור: <span className="font-semibold text-text-primary">{next.workout.titleHe ?? "אימון"}</span>
               </p>
               <Link href={`/workout/${next.workout.id}`} className={buttonClasses({ size: "lg", fullWidth: true })}>
                 לאימון הבא
               </Link>
             </div>
           ) : (
-            <p className="text-body-lg text-text-secondary">עוד לא הוספנו את האימון הבא. נעדכן אתכם.</p>
+            <p className="text-body-md text-text-secondary">עוד לא הוספנו את האימון הבא. נעדכן אתכם.</p>
           )}
           <Button variant="ghost" onClick={onBack}>
             חזרה לבית
@@ -293,32 +278,29 @@ function OutcomeView({ outcome, onBack }: { outcome: Outcome; onBack: () => void
   const { result, reward } = outcome;
   return (
     <StackShell title="אתגר מעבר רמה" backHref="/home" backLabel="לבית">
-      {result.passed && <Confetti pieces={56} />}
-      <section className="mx-auto flex w-full max-w-md flex-col items-center gap-5 pt-8 text-center lg:pt-16">
+      {result.passed && <Confetti pieces={48} />}
+      <section className="mx-auto flex w-full max-w-md flex-col items-center gap-5 pt-10 text-center lg:pt-16">
         {result.passed ? (
           <>
-            <span className="ff-pop-in relative flex size-24 items-center justify-center rounded-full bg-volt text-canvas shadow-glow-volt">
-              <span aria-hidden="true" className="ff-ring absolute inset-0 rounded-full border-2 border-volt" />
-              {result.planCompleted ? <TrophyIcon className="size-12" /> : <FlagIcon className="size-12" />}
+            <span className="ff-pop-in flex size-16 items-center justify-center rounded-full bg-volt text-canvas">
+              <FlagIcon className="size-8" />
             </span>
-            <h2 className="ff-rise-in font-heading text-display-hero-mobile font-extrabold [animation-delay:200ms] lg:text-display-hero">
-              {result.planCompleted ? "סיימתם את כל המסלול!" : "עברתם רמה!"}
-            </h2>
+            <h2 className="ff-rise-in font-heading text-[30px] font-bold leading-10 [animation-delay:80ms]">{result.planCompleted ? "סיימתם את כל המסלול" : "עברתם רמה"}</h2>
             {!result.planCompleted && (
-              <p className="ff-rise-in text-body-lg text-text-secondary [animation-delay:350ms]">
-                עכשיו אתם ברמה <span dir="ltr" className="font-bold text-text-primary">{result.currentLevelNumber}</span>.
+              <p className="ff-rise-in text-body-lg text-text-secondary [animation-delay:150ms]">
+                עכשיו אתם ברמה <span dir="ltr" className="font-bold text-text-primary">{result.currentLevelNumber}</span>
               </p>
             )}
-            <RewardBadge reward={reward} />
-            <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true })} ff-rise-in [animation-delay:1000ms]`}>
+            <RewardRows reward={reward} />
+            <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true })} ff-rise-in [animation-delay:450ms]`}>
               למסלול
             </Link>
           </>
         ) : (
           <>
-            <h2 className="ff-rise-in font-heading text-display-hero-mobile font-extrabold lg:text-display-hero">עוד לא, אבל כמעט</h2>
-            <p className="ff-rise-in text-body-lg text-text-secondary [animation-delay:150ms]">אפשר לנסות שוב מתי שרוצים. אין הגבלה.</p>
-            <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true, variant: "secondary" })} ff-rise-in [animation-delay:300ms]`}>
+            <h2 className="ff-rise-in font-heading text-[30px] font-bold leading-10">עוד לא עברתם</h2>
+            <p className="ff-rise-in text-body-lg text-text-secondary [animation-delay:100ms]">אפשר לנסות שוב מתי שרוצים. אין הגבלה.</p>
+            <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true, variant: "secondary" })} ff-rise-in [animation-delay:200ms]`}>
               חזרה למסלול
             </Link>
           </>
