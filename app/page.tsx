@@ -1,10 +1,12 @@
 import Image from "next/image";
 import AuthActions from "@/components/AuthActions";
 import HeroVisual from "@/components/hero/HeroVisual";
+import RedirectIfSignedIn from "@/components/app/RedirectIfSignedIn";
 
 export default function Home() {
   return (
     <main className="relative flex min-h-dvh flex-1 flex-col items-center overflow-hidden bg-canvas px-gutter pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+      <RedirectIfSignedIn />
       {/* ambient glows + grid */}
       <div aria-hidden="true" className="pointer-events-none absolute -top-40 left-1/2 size-[520px] -translate-x-1/2 rounded-full bg-ember/25 blur-[120px]" />
       <div aria-hidden="true" className="pointer-events-none absolute -bottom-48 -right-24 size-[360px] rounded-full bg-volt/10 blur-[110px]" />

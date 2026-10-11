@@ -17,7 +17,7 @@ function apiOrigin(): string | null {
 }
 
 // Least privilege: only these API areas are reachable through the customer app. Add prefixes as features need them.
-const ALLOWED_PREFIXES = ["auth/"];
+const ALLOWED_PREFIXES = ["auth/", "me/", "workouts/", "challenges/"];
 
 const FORWARDED_REQUEST_HEADERS = ["content-type", "accept", "cookie"];
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { api, describeAuthError, type CurrentUser } from "@/lib/api";
 import { useGoogleSignIn } from "@/lib/googleIdentity";
@@ -21,6 +22,7 @@ function GoogleIcon() {
 // its own button, so each styled button has Google's real button laid invisibly on top (GoogleButtonOverlay); the
 // token goes to the API, which checks the email against the invited list and sets the session cookie.
 export default function AuthActions() {
+  const router = useRouter();
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -46,40 +48,22 @@ export default function AuthActions() {
     setNotice(null);
     try {
       setUser(await api.loginWithGoogle(credential));
+      router.push("/home");
     } catch (error) {
       setNotice(describeAuthError(error));
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [router]);
 
   const googleStatus = useGoogleSignIn(handleCredential);
 
-  const logout = async () => {
-    try {
-      await api.logout();
-    } finally {
-      setUser(null);
-    }
-  };
-
   if (user) {
+    // signed in (just now, or already): RedirectIfSignedIn / the login handler take the customer to /home
     return (
-      <div className="mx-auto flex w-full max-w-xs flex-col items-center gap-5 text-center">
-        <p className="font-heading text-headline-sm font-bold">
-          שלום{user.displayName ? ` ${user.displayName}` : ""} 👋
-        </p>
-        <p className="text-body-md text-volt">
-          התחברתם בהצלחה. המסע שלכם בדרך, עוד רגע 💪
-        </p>
-        <button
-          type="button"
-          onClick={() => void logout()}
-          className="h-10 rounded-full border border-border-emphasis px-6 text-body-md text-text-secondary transition hover:text-text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          התנתקות
-        </button>
-      </div>
+      <p role="status" aria-live="polite" className="text-center text-body-md text-text-secondary ff-pulse-soft">
+        מעבירים אתכם לאימונים...
+      </p>
     );
   }
 
