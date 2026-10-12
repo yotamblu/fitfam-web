@@ -1,6 +1,10 @@
 import Image from "next/image";
 
-// Launch splash: big logo on a flat canvas, then fades out to reveal the landing page.
+// Launch splash: big logo on a flat canvas, then fades out to reveal the page.
+// Two modes, chosen by the first path of the document: the welcome page uses a timed splash (CSS only); the signed-in
+// screens (/home, /roadmap, /profile, /workout) HOLD the splash until the app calls releaseSplash() (lib/splash.ts), so
+// there is no loading screen between the splash and the screen, however slow the network is. The splash always stays
+// at least RELEASE_MS on screen.
 // Pure CSS + a tiny inline script (no hydration needed, so it can never get stuck on screen).
 // The inline script flags <html data-splash="on"> so page animations are held (globals.css) and
 // releases them just before the splash finishes fading. Flat canvas at the top edge keeps the
@@ -12,7 +16,7 @@ export default function Splash() {
     <>
       <script
         dangerouslySetInnerHTML={{
-          __html: `document.documentElement.setAttribute("data-splash","on");setTimeout(function(){document.documentElement.removeAttribute("data-splash")},${RELEASE_MS});`,
+          __html: `(function(){var h=document.documentElement,t0=Date.now();h.setAttribute("data-splash","on");if(!/^\\/(home|roadmap|profile|workout)(\\/|$)/.test(location.pathname)){setTimeout(function(){h.removeAttribute("data-splash")},${RELEASE_MS});return}h.setAttribute("data-splash-hold","on");window.__ffRelease=function(){if(window.__ffReleased)return;window.__ffReleased=1;setTimeout(function(){h.removeAttribute("data-splash");h.setAttribute("data-splash-leave","on");setTimeout(function(){h.setAttribute("data-splash-gone","on")},500)},Math.max(0,${RELEASE_MS}-(Date.now()-t0)))}})();`,
         }}
       />
       <div

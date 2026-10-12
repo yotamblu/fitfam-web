@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api, describeError, type CurrentUser, type MyPlan, type Stats } from "@/lib/api";
 import { isRunning, sfx } from "@/lib/sfx";
+import { releaseSplash } from "@/lib/splash";
+import Image from "next/image";
 import Button from "../ui/Button";
-import { BrandLoader } from "./ui";
 
 type SessionValue = {
   user: CurrentUser;
@@ -41,6 +42,7 @@ function readStoredSlug(): string | null {
 /** Gate for every signed-in screen: loads the user and their plans, or sends the visitor back to the welcome page. */
 export default function SessionProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [plans, setPlans] = useState<MyPlan[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -85,15 +87,30 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
       .catch((e) => {
         if (cancelled) return;
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
-          router.replace("/");
+          // the session is gone: clear the cookie (so the welcome page is not skipped again), then show the welcome page
+          void api
+            .logout()
+            .catch(() => undefined)
+            .then(() => router.replace("/?signedout=1"));
           return;
         }
         setError(describeError(e));
       });
+    // a connection that never answers must not hold the splash forever: after a minute, offer a retry
+    const giveUp = window.setTimeout(() => {
+      if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
+    }, 60000);
     return () => {
       cancelled = true;
+      window.clearTimeout(giveUp);
     };
   }, [router, attempt]);
+
+  // The home screen releases the splash itself once its own data is in; every other screen (and the error screen) when the session is ready.
+  const ready = Boolean(user && plans);
+  useEffect(() => {
+    if (error || (ready && pathname !== "/home")) releaseSplash();
+  }, [error, ready, pathname]);
 
   const reloadStats = useCallback(async (): Promise<Stats | null> => {
     try {
@@ -149,6 +166,13 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
       </main>
     );
   }
-  if (!value) return <BrandLoader label="טוענים את האימונים שלכם" />;
+  // no loading screen: while the session loads, the launch splash (or, after a fresh sign-in, the same logo screen) is all there is
+  if (!value) {
+    return (
+      <div aria-hidden="true" className="fixed inset-0 z-50 flex items-center justify-center bg-canvas">
+        <Image src="/logo-transparent.png" alt="" width={640} height={573} priority className="h-auto w-[68vw] max-w-[320px]" />
+      </div>
+    );
+  }
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

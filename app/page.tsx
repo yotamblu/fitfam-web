@@ -1,12 +1,12 @@
 import Image from "next/image";
 import AuthActions from "@/components/AuthActions";
 import HeroVisual from "@/components/hero/HeroVisual";
-import RedirectIfSignedIn from "@/components/app/RedirectIfSignedIn";
+import SplashRelease from "@/components/SplashRelease";
 
 export default function Home() {
   return (
     <main className="relative flex min-h-dvh flex-1 flex-col items-center overflow-hidden bg-canvas px-gutter pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-      <RedirectIfSignedIn />
+      <SplashRelease />
       {/* the page fades in from the status-bar tint colour (iOS paints that strip as one flat colour) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-status-tint via-status-tint/60 to-transparent" />
 

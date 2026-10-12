@@ -9,6 +9,7 @@ import { buttonClasses } from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
 import { CheckIcon, ChevronLeftIcon, FlameIcon, PlayIcon } from "./icons";
 import { Card, Meta, RowList, SectionTitle } from "./primitives";
+import { releaseSplash } from "@/lib/splash";
 import { useSession } from "./Session";
 import { CountUp, ProgressRing, Reveal, Skeleton } from "./ui";
 
@@ -31,6 +32,12 @@ export default function HomeScreen() {
       cancelled = true;
     };
   }, [plans]);
+
+  // the launch splash stays up until the home screen has everything it needs to show
+  const homeReady = roadmaps !== null || error !== null;
+  useEffect(() => {
+    if (homeReady) releaseSplash();
+  }, [homeReady]);
 
   const firstName = (user.displayName ?? "").split(" ")[0];
   const today = new Date().toLocaleDateString("he-IL", { weekday: "long", day: "numeric", month: "long" });
