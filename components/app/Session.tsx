@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api, describeError, type CurrentUser, type MyPlan, type Stats } from "@/lib/api";
-import { sfx } from "@/lib/sfx";
+import { isRunning, sfx } from "@/lib/sfx";
 import Button from "../ui/Button";
 import { BrandLoader } from "./ui";
 
@@ -49,18 +49,25 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
 
   const [attempt, setAttempt] = useState(0);
 
-  // browsers only allow audio after a touch: the first one unlocks the sound effects
+  // browsers only allow audio from a tap, and iPhones only from a FINISHED tap (touchend / click), so every one of those
+  // tries to unlock until the audio engine is really running; coming back to the app tries again (iOS can suspend it)
   useEffect(() => {
-    const unlock = () => {
+    const events = ["touchend", "click", "pointerup", "keydown"] as const;
+    const attempt = () => {
       sfx.unlock();
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
+      if (isRunning()) events.forEach((name) => window.removeEventListener(name, attempt, true));
     };
-    window.addEventListener("pointerdown", unlock, { passive: true });
-    window.addEventListener("keydown", unlock);
+    const rearm = () => {
+      if (document.visibilityState !== "visible" || isRunning()) return;
+      events.forEach((name) => window.addEventListener(name, attempt, { capture: true, passive: true }));
+    };
+    events.forEach((name) => window.addEventListener(name, attempt, { capture: true, passive: true }));
+    document.addEventListener("visibilitychange", rearm);
+    window.addEventListener("ff-audio-state", rearm);
     return () => {
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
+      events.forEach((name) => window.removeEventListener(name, attempt, true));
+      document.removeEventListener("visibilitychange", rearm);
+      window.removeEventListener("ff-audio-state", rearm);
     };
   }, []);
 

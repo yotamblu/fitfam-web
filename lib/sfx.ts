@@ -6,16 +6,26 @@
 // from a few oscillators with a quick envelope, scheduled on the audio clock (never with setTimeout), and slightly
 // randomised so repeated sounds do not feel mechanical.
 //
-// Browsers keep audio suspended until the user touches the page, so `unlock()` is called from the first gesture
-// (Session.tsx). A mute switch is stored in localStorage (a per-person convenience).
+// Browsers keep audio suspended until the user touches the page, so `unlock()` is called from taps (Session.tsx).
+// iPhones are the strict case, and the reason this file has so much unlocking in it:
+//   - iOS only counts a tap that has FINISHED (touchend / click) as a gesture, not pointerdown, and it can suspend the
+//     context again (app switch, a call), so every tap tries to resume until it is really running;
+//   - Web Audio follows the ring/silent switch by default (the "ambient" audio session), so on a muted phone nothing
+//     plays. `navigator.audioSession.type = "playback"` (iOS 16.4+) moves it to the media channel; older iPhones get a
+//     silent looping <audio> element that does the same. The cost of "playback" is that it can pause music playing in
+//     the background, so there is a "polite" mode (profile setting) that keeps the default behaviour.
+// Two preferences live in localStorage (per person, per device): sound on/off and sound mode.
 
 const KEY = "fitfam.sound";
+const MODE_KEY = "fitfam.sound.mode";
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 let wet: GainNode | null = null;
 let noise: AudioBuffer | null = null;
 let muted: boolean | null = null;
+let polite: boolean | null = null;
+let silentAudio: HTMLAudioElement | null = null;
 
 type Voice = {
   type?: OscillatorType;
@@ -37,6 +47,10 @@ function audio(): AudioContext | null {
   const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
   if (!AC) return null;
   ctx = new AC();
+  // a new context is often created suspended even inside a tap: ask for it to run right away
+  void ctx.resume().catch(() => undefined);
+  // tell the app when the engine stops running (iOS suspends it on an app switch or a call), so it can try again on the next tap
+  ctx.addEventListener("statechange", () => window.dispatchEvent(new Event("ff-audio-state")));
 
   const compressor = ctx.createDynamicsCompressor();
   compressor.threshold.value = -14;
@@ -86,10 +100,98 @@ export function setMuted(value: boolean) {
   }
 }
 
-/** Call from a user gesture: browsers refuse to play audio before the person has touched the page. */
+/** "polite": respect the silent switch and never interrupt the person's music. Default is to always be heard. */
+export function isPolite(): boolean {
+  if (polite !== null) return polite;
+  try {
+    polite = window.localStorage.getItem(MODE_KEY) === "polite";
+  } catch {
+    polite = false;
+  }
+  return polite;
+}
+
+export function setPolite(value: boolean) {
+  polite = value;
+  try {
+    window.localStorage.setItem(MODE_KEY, value ? "polite" : "always");
+  } catch {
+    // a remembered choice is only a convenience
+  }
+  routeThroughMediaChannel();
+}
+
+/** True once the browser is really letting us play. */
+export function isRunning(): boolean {
+  return ctx !== null && ctx.state === "running";
+}
+
+/** One second of silence as a tiny WAV, built here instead of shipped as a file. */
+function silentWavUrl(): string {
+  const samples = 800;
+  const bytes = new Uint8Array(44 + samples).fill(128);
+  const view = new DataView(bytes.buffer);
+  const text = (offset: number, value: string) => [...value].forEach((ch, k) => view.setUint8(offset + k, ch.charCodeAt(0)));
+  text(0, "RIFF");
+  view.setUint32(4, 36 + samples, true);
+  text(8, "WAVEfmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
+  view.setUint32(24, 8000, true);
+  view.setUint32(28, 8000, true);
+  view.setUint16(32, 1, true);
+  view.setUint16(34, 8, true);
+  text(36, "data");
+  view.setUint32(40, samples, true);
+  return URL.createObjectURL(new Blob([bytes], { type: "audio/wav" }));
+}
+
+/** Moves the page's audio from the ringer channel (muted by the silent switch) to the media channel, unless polite. */
+function routeThroughMediaChannel() {
+  if (typeof navigator === "undefined") return;
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  if (session) {
+    try {
+      session.type = isPolite() ? "auto" : "playback";
+    } catch {
+      // not supported in this version
+    }
+    return;
+  }
+  // older iPhones have no audioSession: a silent looping <audio> puts the page on the media channel
+  if (/iP(hone|ad|od)/.test(navigator.userAgent)) {
+    if (isPolite()) {
+      silentAudio?.pause();
+      return;
+    }
+    if (!silentAudio) {
+      silentAudio = document.createElement("audio");
+      silentAudio.src = silentWavUrl();
+      silentAudio.loop = true;
+      silentAudio.setAttribute("playsinline", "");
+    }
+    void silentAudio.play().catch(() => undefined);
+  }
+}
+
+/**
+ * Call from a tap (touchend / click / key). Creates the audio engine if needed, asks it to run, plays one silent sample
+ * (the classic iOS unlock) and sets up the media channel. Safe and cheap to call on every tap until it is running.
+ */
 export function unlock() {
   const c = audio();
-  if (c && c.state === "suspended") void c.resume();
+  if (!c) return;
+  routeThroughMediaChannel();
+  if (c.state !== "running") void c.resume().catch(() => undefined);
+  try {
+    const silent = c.createBufferSource();
+    silent.buffer = c.createBuffer(1, 1, 22050);
+    silent.connect(c.destination);
+    silent.start(0);
+  } catch {
+    // the resume above is what matters
+  }
 }
 
 /** Schedules one note `at` seconds from now. */
@@ -97,6 +199,7 @@ function note(freq: number, at: number, dur: number, v: Voice = {}) {
   if (readMuted()) return;
   const c = audio();
   if (!c || !master) return;
+  if (c.state !== "running") void c.resume().catch(() => undefined); // after an app switch or a call iOS suspends it again
   const t = c.currentTime + at;
   const osc = c.createOscillator();
   const gain = c.createGain();
@@ -141,6 +244,7 @@ function whooshNoise(at: number, dur: number, from: number, to: number, peak = 0
   if (readMuted()) return;
   const c = audio();
   if (!c || !master || !noise) return;
+  if (c.state !== "running") void c.resume().catch(() => undefined);
   const t = c.currentTime + at;
   const src = c.createBufferSource();
   src.buffer = noise;

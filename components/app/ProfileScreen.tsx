@@ -2,6 +2,7 @@
 
 import Button from "../ui/Button";
 import { LogoutIcon } from "./icons";
+import SoundModeToggle from "./SoundModeToggle";
 import SoundToggle from "./SoundToggle";
 import { ProgressCard } from "./HomeScreen";
 import { Card, Figure, RowList, SectionTitle } from "./primitives";
@@ -93,10 +94,14 @@ export default function ProfileScreen() {
 
           <div className="flex flex-col gap-3">
             <SectionTitle>הגדרות</SectionTitle>
-            <Card className="flex items-center justify-between gap-3 py-1 ps-4 pe-2">
-              <span className="text-body-lg">צלילים</span>
-              <SoundToggle />
+            <Card className="divide-y divide-white/[0.06]">
+              <div className="flex items-center justify-between gap-3 py-1 ps-4 pe-2">
+                <span className="text-body-lg">צלילים</span>
+                <SoundToggle />
+              </div>
+              <SoundModeToggle />
             </Card>
+            <p className="text-label-md text-text-muted">אין צליל באייפון? בדקו שמתג ההשתקה שבצד המכשיר לא במצב שקט, ושעוצמת המדיה מורמת.</p>
           </div>
 
           <div>
