@@ -273,45 +273,6 @@ function renderToUrl(recipe: () => void): string {
   return toWavUrl(renderSamples(recipe));
 }
 
-/**
- * Diagnostics for a phone that stays silent: plays the same chime three different ways, each called straight from a tap,
- * and reports what the browser said. "pool" = the normal engine, "fresh" = a brand-new audio element, "webaudio" = a
- * Web Audio buffer.
- */
-export function testVariant(kind: "pool" | "fresh" | "webaudio"): Promise<string> {
-  const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
-  if (kind === "pool") {
-    unlockPool();
-    playRendered("test:correct", recipes.correct);
-    return wait(1200).then(() => audioStatus());
-  }
-  if (kind === "fresh") {
-    const el = new Audio() as HTMLAudioElement;
-    el.setAttribute("playsinline", "");
-    el.src = toWavUrl(renderSamples(recipes.correct));
-    let outcome = "ההפעלה עדיין ממתינה";
-    el.play().then(
-      () => (outcome = "הנגן אישר שהוא מנגן"),
-      (error: unknown) => (outcome = `נדחה: ${error instanceof Error ? error.name : String(error)}`),
-    );
-    return wait(1200).then(() => `נגן חדש: ${outcome} · זמן ניגון ${el.currentTime.toFixed(2)} ש׳ · מושהה ${el.paused ? "כן" : "לא"} · מוכנות ${el.readyState}`);
-  }
-  const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AC) return Promise.resolve("Web Audio לא נתמך");
-  const c = new AC();
-  void c.resume().catch(() => undefined);
-  const samples = renderSamples(recipes.correct);
-  const buffer = c.createBuffer(1, samples.length, RATE);
-  const channel = buffer.getChannelData(0);
-  for (let i = 0; i < samples.length; i++) channel[i] = samples[i] / 32768;
-  const source = c.createBufferSource();
-  source.buffer = buffer;
-  source.connect(c.destination);
-  source.start(0);
-  const before = c.currentTime;
-  return wait(1000).then(() => `Web Audio: מצב ${c.state} · השעון התקדם ${(c.currentTime - before).toFixed(2)} ש׳`);
-}
-
 function playRendered(key: string, recipe: () => void) {
   ensurePool();
   if (pool.length === 0) return;
