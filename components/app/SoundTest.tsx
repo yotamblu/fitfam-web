@@ -12,8 +12,9 @@ export default function SoundTest() {
         type="button"
         onClick={() => {
           sfx.unlock();
-          sfx.correct();
-          window.setTimeout(() => setStatus(audioStatus()), 800);
+          // let the silent unlock clips finish first so the chime does not cut one off
+          window.setTimeout(() => sfx.correct(), 250);
+          window.setTimeout(() => setStatus(audioStatus()), 1000);
         }}
         className="self-start rounded-xl bg-white/[0.07] px-4 py-2.5 text-body-md font-semibold transition-colors hover:bg-white/[0.11]"
       >

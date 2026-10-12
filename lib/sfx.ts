@@ -247,7 +247,10 @@ function unlockPool() {
           el.ffUnlocked = true;
         })
         .catch((error: unknown) => {
-          lastError = error instanceof Error ? error.name : String(error);
+          const name = error instanceof Error ? error.name : String(error);
+          // an effect took the element over mid-clip: the tap still started playback, so it is open
+          if (name === "AbortError") el.ffUnlocked = true;
+          else lastError = name;
         });
     }
   }
@@ -281,7 +284,8 @@ function playRendered(key: string, recipe: () => void) {
   const started = el.play();
   if (started) {
     started.catch((error: unknown) => {
-      lastError = error instanceof Error ? error.name : String(error);
+      const name = error instanceof Error ? error.name : String(error);
+      if (name !== "AbortError") lastError = name; // AbortError = replaced by a newer sound, not a failure
     });
   }
 }
