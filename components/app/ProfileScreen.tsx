@@ -3,6 +3,7 @@
 import Button from "../ui/Button";
 import { LogoutIcon } from "./icons";
 import SoundModeToggle from "./SoundModeToggle";
+import SoundTest from "./SoundTest";
 import SoundToggle from "./SoundToggle";
 import { ProgressCard } from "./HomeScreen";
 import { Card, Figure, RowList, SectionTitle } from "./primitives";
@@ -100,6 +101,7 @@ export default function ProfileScreen() {
                 <SoundToggle />
               </div>
               <SoundModeToggle />
+              <SoundTest />
             </Card>
             <p className="text-label-md text-text-muted">אין צליל באייפון? בדקו שמתג ההשתקה שבצד המכשיר לא במצב שקט, ושעוצמת המדיה מורמת.</p>
           </div>
