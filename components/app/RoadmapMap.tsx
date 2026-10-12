@@ -284,6 +284,7 @@ function Banner({ point, total, index, theme }: { point: Extract<Pt, { kind: "ba
             {level.state === "done" && <CheckIcon className="size-5" />}
             {level.state === "locked" && <LockIcon className="size-5" />}
             {level.state === "skipped" && <span className="text-label-md font-bold">דולג</span>}
+            {level.state === "open" && <span className="text-label-md font-bold">פתוח</span>}
             {level.state === "current" && <BoltIcon className="ff-flame size-5" />}
           </div>
         </div>
@@ -321,7 +322,7 @@ function Stop({
   const { workout } = point;
   const [ref, seen] = useInView<HTMLDivElement>();
   const challenge = workout.type === "challenge";
-  const openable = workout.state === "done" || workout.state === "current" || workout.canAttempt;
+  const openable = workout.state === "done" || workout.state === "current" || workout.state === "open" || workout.canAttempt;
   const points = challenge ? rewards.challenge : rewards.workout;
   const size = challenge ? "clamp(80px, 26cqw, 124px)" : "clamp(66px, 21cqw, 100px)";
 
@@ -330,9 +331,11 @@ function Stop({
       ? [theme.done, theme.doneDark]
       : workout.state === "current"
         ? ["#ff5637", "#a9301a"]
-        : challenge && workout.canAttempt
-          ? ["#ffb02e", "#a8620a"]
-          : [theme.locked, theme.lockedDark];
+        : workout.state === "open"
+          ? ["#3b9cf0", "#1d5c9c"]
+          : challenge && workout.canAttempt
+            ? ["#ffb02e", "#a8620a"]
+            : [theme.locked, theme.lockedDark];
   const muted = workout.state === "locked" || workout.state === "skipped";
 
   const node = (

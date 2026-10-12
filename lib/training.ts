@@ -186,6 +186,7 @@ export const STATE_LABELS: Record<NodeState, string> = {
   current: "הבא בתור",
   locked: "נעול",
   skipped: "דולג",
+  open: "פתוח",
 };
 
 /** Set by the guided player when its last step is done, so the workout page can finish the workout and celebrate on arrival. */

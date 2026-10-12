@@ -47,7 +47,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 // ---- training (what the API returns for a logged-in customer) ----
 
 export type Sport = "running" | "swimming" | "gym" | "calisthenics";
-export type NodeState = "done" | "current" | "locked" | "skipped";
+export type NodeState = "done" | "current" | "locked" | "skipped" | "open";
 
 export type MyPlan = {
   enrollmentId: string;
