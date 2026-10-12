@@ -218,6 +218,8 @@ type PoolEl = HTMLAudioElement & { ffUnlocked?: boolean; ffStarted?: number };
 const pool: PoolEl[] = [];
 const wavCache = new Map<string, string>();
 let lastError = "";
+let lastPlay = "";
+let lastEl: PoolEl | null = null;
 let silent: string | null = null;
 let warmed = false;
 
@@ -281,12 +283,18 @@ function playRendered(key: string, recipe: () => void) {
   el.src = url;
   el.currentTime = 0;
   el.ffStarted = performance.now();
+  lastEl = el;
+  lastPlay = "ביקשנו הפעלה";
   const started = el.play();
   if (started) {
-    started.catch((error: unknown) => {
-      const name = error instanceof Error ? error.name : String(error);
-      if (name !== "AbortError") lastError = name; // AbortError = replaced by a newer sound, not a failure
-    });
+    started
+      .then(() => {
+        lastPlay = "הנגן אישר שהוא מנגן";
+      })
+      .catch((error: unknown) => {
+        const name = error instanceof Error ? error.name : String(error);
+        if (name !== "AbortError") lastError = name; // AbortError = replaced by a newer sound, not a failure
+      });
   }
 }
 
@@ -457,8 +465,12 @@ export function audioStatus(): string {
   if (isPolite()) {
     return `מצב מכבד: Web Audio · מצב המנוע ${ctx ? ctx.state : "לא נוצר"}${lastError ? ` · שגיאה ${lastError}` : ""}`;
   }
+  if (isMuted()) return "הצלילים כבויים (המתג בכותרת או בפרופיל). הפעילו אותם ונסו שוב.";
   const open = pool.filter((el) => el.ffUnlocked).length;
-  return `מצב רגיל: נגן אודיו · נפתחו ${open} מתוך ${pool.length || POOL_SIZE}${lastError ? ` · שגיאה אחרונה ${lastError}` : " · אין שגיאות"}`;
+  const detail = lastEl
+    ? ` · ${lastPlay} · משך ${Number.isFinite(lastEl.duration) ? lastEl.duration.toFixed(1) : "?"} ש׳ · עוצמה ${lastEl.volume} · מושתק ${lastEl.muted ? "כן" : "לא"} · מוכנות ${lastEl.readyState}`
+    : " · עוד לא הושמע צליל";
+  return `מצב רגיל: נגן אודיו · נפתחו ${open} מתוך ${pool.length || POOL_SIZE}${lastError ? ` · שגיאה אחרונה ${lastError}` : " · אין שגיאות"}${detail}`;
 }
 
 const jitter = (n: number, pct = 0.015) => n * (1 + (Math.random() * 2 - 1) * pct);
