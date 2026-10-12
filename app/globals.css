@@ -316,8 +316,10 @@
   }
 }
 
+/* native-app feel: no pinch zoom and no double-tap zoom (iOS ignores user-scalable, so touch-action and NoZoom do the work) */
 html,
 body {
+  touch-action: pan-x pan-y;
   /* animations that grow past the screen edge (glows, bursts, slide-ins) are clipped, never allowed to widen the page */
   overflow-x: clip;
   background-color: #131314;

@@ -3,6 +3,7 @@ import { Assistant, Heebo } from "next/font/google";
 import StatusBarTint from "@/components/StatusBarTint";
 import Splash from "@/components/Splash";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import NoZoom from "@/components/NoZoom";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -33,6 +34,8 @@ export const viewport: Viewport = {
   themeColor: "#131314",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -49,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         {children}
         <StatusBarTint />
         <ServiceWorkerRegister />
+        <NoZoom />
       </body>
     </html>
   );
