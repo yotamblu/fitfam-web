@@ -2,13 +2,19 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, describeError, type CustomerWorkout, type Step } from "@/lib/api";
-import { BLOCK_LABELS, ZONE_HINT, clock, formatSeconds, targetDetails, targetHeadline, targetParts } from "@/lib/training";
+import { haptic, sfx } from "@/lib/sfx";
+import { BLOCK_LABELS, FINISH_FLAG, ZONE_HINT, clock, formatSeconds, targetDetails, targetHeadline, targetParts } from "@/lib/training";
 import Button from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
-import { CloseIcon } from "./icons";
+import ExerciseSheet from "./ExerciseSheet";
+import { CloseIcon, InfoIcon } from "./icons";
 import { Meta } from "./primitives";
+import { themeForWorkout } from "./RoadmapScenery";
+import SoundToggle from "./SoundToggle";
+import { useVenueTint } from "./StackShell";
+import VenueBackdrop from "./VenueBackdrop";
 import { ProgressRing, Skeleton } from "./ui";
 import Video from "./Video";
 
@@ -27,7 +33,11 @@ export default function PlayerScreen() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [running, setRunning] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [exerciseId, setExerciseId] = useState<string | null>(null);
+  const closeExercise = useCallback(() => setExerciseId(null), []);
   const endAt = useRef<number | null>(null);
+  const doneRef = useRef(false); // a finished workout can be played again for practice: nothing to save, nothing to earn
+  const lastBeep = useRef<number | null>(null);
 
   /** Moves to a step and sets up its timer: rests start by themselves, timed work waits for a tap. */
   const goTo = useCallback(
@@ -45,7 +55,8 @@ export default function PlayerScreen() {
         setRunning(false);
         endAt.current = null;
       }
-      if (save) api.saveProgress(id, next).catch(() => undefined);
+      lastBeep.current = null;
+      if (save && !doneRef.current) api.saveProgress(id, next).catch(() => undefined);
     },
     [id],
   );
@@ -55,6 +66,7 @@ export default function PlayerScreen() {
     Promise.all([api.workout(id), api.steps(id)])
       .then(([w, s]) => {
         if (cancelled) return;
+        doneRef.current = w.state === "done";
         setWorkout(w);
         setSteps(s.steps);
         if (s.steps.length > 0) goTo(s.steps, Math.min(s.resumeStep, s.steps.length - 1), false);
@@ -80,13 +92,25 @@ export default function PlayerScreen() {
     };
   }, []);
 
+  const theme = useMemo(() => (workout ? themeForWorkout(workout) : null), [workout]);
+  useVenueTint(theme);
+
   const step = steps?.[index] ?? null;
   const last = steps ? index === steps.length - 1 : false;
 
-  const advance = useCallback(() => {
-    if (!steps) return;
-    if (index < steps.length - 1) goTo(steps, index + 1);
-  }, [steps, index, goTo]);
+  const advance = useCallback(
+    (silent = false) => {
+      if (!steps) return;
+      if (index < steps.length - 1) {
+        if (!silent) {
+          if (steps[index].type === "work" && steps[index + 1].type === "rest") sfx.setDone();
+          else sfx.step();
+        }
+        goTo(steps, index + 1);
+      }
+    },
+    [steps, index, goTo],
+  );
 
   // countdown: derived from a timestamp so a throttled background tab does not drift
   useEffect(() => {
@@ -95,15 +119,21 @@ export default function PlayerScreen() {
       if (endAt.current === null) return;
       const left = Math.max(0, Math.ceil((endAt.current - Date.now()) / 1000));
       setRemaining(left);
+      // the last three seconds tick, so you can look away from the screen
+      if (left >= 1 && left <= 3 && lastBeep.current !== left) {
+        lastBeep.current = left;
+        sfx.countdown();
+      }
       if (left === 0) {
         window.clearInterval(timer);
         setRunning(false);
-        try {
-          navigator.vibrate?.([200, 100, 200]);
-        } catch {
-          // vibration is a nicety
+        haptic([200, 100, 200]);
+        if (step?.type === "rest") {
+          sfx.go();
+          advance(true);
+        } else {
+          sfx.timerDone();
         }
-        if (step?.type === "rest") advance();
       }
     }, 250);
     return () => window.clearInterval(timer);
@@ -127,16 +157,17 @@ export default function PlayerScreen() {
     if (running) endAt.current = Date.now() + next * 1000;
   };
 
-  const finish = async () => {
+  const finish = () => {
     setFinishing(true);
-    setError(null);
-    try {
-      if (workout?.type !== "challenge") await api.complete(id);
-      router.replace(`/workout/${id}`);
-    } catch (e) {
-      setError(describeError(e));
-      setFinishing(false);
+    // a first-time run is finished (and celebrated) by the workout page; a replay just goes back
+    if (!doneRef.current && workout?.type !== "challenge") {
+      try {
+        window.sessionStorage.setItem(FINISH_FLAG, id);
+      } catch {
+        // without session storage the customer taps the finish button on the workout page
+      }
     }
+    router.replace(`/workout/${id}`);
   };
 
   if (error && !steps) {
@@ -172,7 +203,7 @@ export default function PlayerScreen() {
 
   return (
     <div className={`relative min-h-dvh transition-colors duration-300 ${isRest ? "bg-volt/[0.05]" : ""}`}>
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-status-tint/55 to-transparent" />
+      {theme ? <VenueBackdrop theme={theme} /> : <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-status-tint/55 to-transparent" />}
       <div className="relative mx-auto flex min-h-dvh w-full max-w-2xl flex-col lg:max-w-3xl">
 
       <header className="relative z-20 flex flex-col gap-3 px-gutter pt-[calc(env(safe-area-inset-top)+14px)] lg:px-10 lg:pt-8">
@@ -184,9 +215,12 @@ export default function PlayerScreen() {
           >
             <CloseIcon />
           </Link>
-          <p dir="ltr" className="text-body-md tabular-nums text-text-secondary">
-            {index + 1} / {steps.length}
-          </p>
+          <div className="flex items-center gap-1">
+            <p dir="ltr" className="text-body-md tabular-nums text-text-secondary">
+              {index + 1} / {steps.length}
+            </p>
+            <SoundToggle />
+          </div>
         </div>
         <ProgressBar value={index + 1} max={steps.length} label="התקדמות באימון" tone={isRest ? "volt" : "ember"} />
       </header>
@@ -238,9 +272,16 @@ export default function PlayerScreen() {
             </div>
             <ul className="divide-y divide-white/[0.06] overflow-hidden rounded-2xl bg-surface-raised">
               {(step.targets ?? []).map((t, i) => (
-                <li key={i} className="px-4 py-3.5">
-                  <p className="font-heading text-body-lg font-bold">{t.exercise?.nameHe ?? "תרגיל"}</p>
-                  <p className="text-body-md text-text-secondary">{[targetHeadline(t), ...targetDetails(t)].join(" · ")}</p>
+                <li key={i} className="flex items-center gap-2 px-4 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-heading text-body-lg font-bold">{t.exercise?.nameHe ?? "תרגיל"}</p>
+                    <p className="text-body-md text-text-secondary">{[targetHeadline(t), ...targetDetails(t)].join(" · ")}</p>
+                  </div>
+                  {t.exercise && !t.exercise.id.startsWith("builtin:") && (
+                    <button type="button" onClick={() => setExerciseId(t.exercise!.id)} aria-label={`הסבר על ${t.exercise.nameHe}`} className="flex size-10 shrink-0 items-center justify-center rounded-xl text-info transition-colors hover:bg-white/[0.06]">
+                      <InfoIcon className="size-5" />
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -253,6 +294,12 @@ export default function PlayerScreen() {
               <div>
                 <p className="text-body-md text-text-secondary">{where.filter(Boolean).join(" · ")}</p>
                 <h2 className="mt-1 font-heading text-[32px] font-bold leading-10">{target.exercise?.nameHe ?? "תרגיל"}</h2>
+                {target.exercise && !target.exercise.id.startsWith("builtin:") && (
+                  <button type="button" onClick={() => setExerciseId(target.exercise!.id)} className="mt-2 -ms-2 inline-flex h-10 items-center gap-1.5 rounded-xl px-2 text-body-md font-semibold text-info transition-colors hover:bg-white/[0.06]">
+                    <InfoIcon className="size-5" />
+                    איך מבצעים?
+                  </button>
+                )}
               </div>
 
               <div className="flex items-baseline gap-3">
@@ -283,7 +330,12 @@ export default function PlayerScreen() {
       </main>
 
       <footer className="relative z-20 flex items-center gap-3 bg-canvas/95 px-gutter pt-4 pb-[calc(env(safe-area-inset-bottom)+16px)] lg:px-10">
-        <Button variant="ghost" size="lg" disabled={index === 0} onClick={() => goTo(steps, index - 1)} aria-label="לשלב הקודם">
+        <Button variant="ghost" size="lg" disabled={index === 0} onClick={() => {
+            sfx.back();
+            goTo(steps, index - 1);
+          }}
+          aria-label="לשלב הקודם"
+        >
           הקודם
         </Button>
         {remaining !== null && !isRest && (
@@ -292,16 +344,17 @@ export default function PlayerScreen() {
           </Button>
         )}
         {last ? (
-          <Button size="lg" className="flex-1" disabled={finishing} onClick={() => void finish()}>
-            {finishing ? "שומר..." : workout?.type === "challenge" ? "לסיכום האתגר" : "סיום האימון"}
+          <Button size="lg" className="flex-1" disabled={finishing} onClick={finish}>
+            {finishing ? "שומר..." : workout?.type === "challenge" ? "לסיכום האתגר" : workout?.state === "done" ? "סיום התרגול" : "סיום האימון"}
           </Button>
         ) : (
-          <Button size="lg" className="flex-1" onClick={advance}>
+          <Button size="lg" className="flex-1" onClick={() => advance()}>
             {isRest ? "דילוג על המנוחה" : "בוצע, הלאה"}
           </Button>
         )}
       </footer>
       </div>
+      {exerciseId && <ExerciseSheet exerciseId={exerciseId} theme={theme} onClose={closeExercise} />}
     </div>
   );
 }

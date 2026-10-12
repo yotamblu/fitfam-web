@@ -318,6 +318,8 @@
 
 html,
 body {
+  /* animations that grow past the screen edge (glows, bursts, slide-ins) are clipped, never allowed to widen the page */
+  overflow-x: clip;
   background-color: #131314;
   color: #e5e2e3;
   -webkit-tap-highlight-color: transparent;
@@ -606,4 +608,55 @@ html[data-splash="on"] body > :not(#splash) * {
 }
 ::selection {
   background: color-mix(in srgb, var(--color-ember) 35%, transparent);
+}
+
+/* celebration: a colour burst, slowly turning light rays and a breathing glow (a few seconds, only on the reward screens) */
+@keyframes ff-burst {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+@keyframes ff-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ff-breathe {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+@keyframes ff-glow-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.ff-burst {
+  animation: ff-burst 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.ff-spin-slow {
+  animation: ff-spin 14s linear infinite;
+}
+.ff-breathe {
+  animation: ff-breathe 2.6s ease-in-out infinite;
+}
+.ff-glow-in {
+  animation: ff-glow-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }

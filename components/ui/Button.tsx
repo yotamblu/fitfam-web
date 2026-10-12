@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { sfx } from "@/lib/sfx";
 
 type Variant = "primary" | "secondary" | "ghost" | "volt" | "game";
 type Size = "sm" | "md" | "lg";
@@ -45,7 +46,18 @@ export default function Button({
   fullWidth,
   className = "",
   type = "button",
+  onClick,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size; fullWidth?: boolean }) {
-  return <button type={type} className={`${buttonClasses({ variant, size, fullWidth })} ${className}`} {...props} />;
+  return (
+    <button
+      type={type}
+      className={`${buttonClasses({ variant, size, fullWidth })} ${className}`}
+      onClick={(event) => {
+        sfx.tap();
+        onClick?.(event);
+      }}
+      {...props}
+    />
+  );
 }

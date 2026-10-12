@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { ratio, rankTitle } from "@/lib/gamify";
 import { ChromeContext, DEFAULT_TINT, type Tint } from "./Chrome";
+import GlassTabBar from "./GlassTabBar";
 import { BoltIcon, FlameIcon, HomeIcon, LogoutIcon, RoadIcon, UserIcon } from "./icons";
 import { useSession } from "./Session";
 import RoadmapHud from "./RoadmapHud";
@@ -171,33 +172,8 @@ export default function TabShell({ children }: { children: ReactNode }) {
           <main className={`relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-gutter pb-28 lg:max-w-6xl lg:px-10 lg:pb-12 ${onRoadmap ? "pt-0 lg:pt-6" : "pt-4 lg:pt-10"}`}>{children}</main>
         </div>
 
-        {/* mobile / tablet bottom bar: wears the colour of the zone beneath it */}
-        <nav
-          aria-label="ניווט ראשי"
-          className="fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-colors duration-700 lg:hidden"
-          style={bottomBar}
-        >
-          <ul className="mx-auto flex max-w-2xl">
-            {TABS.map(({ href, label, Icon }) => {
-              const active = pathname === href || pathname.startsWith(`${href}/`);
-              return (
-                <li key={href} className="flex-1">
-                  <Link
-                    href={href}
-                    aria-current={active ? "page" : undefined}
-                    className={`relative flex h-16 flex-col items-center justify-center gap-1 text-label-md font-semibold transition ${active ? "" : "text-white/60 hover:text-white/85"}`}
-                    style={active ? { color: "var(--chrome-accent)" } : undefined}
-                  >
-                    {active && <span aria-hidden="true" className="ff-pop-in absolute top-0 h-0.5 w-10 rounded-full" style={{ backgroundColor: "var(--chrome-accent)", boxShadow: "0 0 12px var(--chrome-accent)" }} />}
-                    <Icon className={active ? "ff-pop-in" : ""} />
-                    {label}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
+        {/* phones and tablets: the floating liquid-glass tab bar (drag the lens between tabs) */}
+        <GlassTabBar tabs={TABS} />
       </div>
     </ChromeContext.Provider>
   );

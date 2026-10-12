@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api, describeError, type CurrentUser, type MyPlan, type Stats } from "@/lib/api";
+import { sfx } from "@/lib/sfx";
 import Button from "../ui/Button";
 import { BrandLoader } from "./ui";
 
@@ -47,6 +48,21 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const [attempt, setAttempt] = useState(0);
+
+  // browsers only allow audio after a touch: the first one unlocks the sound effects
+  useEffect(() => {
+    const unlock = () => {
+      sfx.unlock();
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+    window.addEventListener("pointerdown", unlock, { passive: true });
+    window.addEventListener("keydown", unlock);
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

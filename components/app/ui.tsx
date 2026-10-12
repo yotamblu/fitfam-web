@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useCountUp, useInView } from "./hooks";
 
 /** Fades and lifts its children in when they first scroll into view. */
@@ -133,4 +134,10 @@ export function BrandLoader({ label = "טוען" }: { label?: string }) {
       </div>
     </main>
   );
+}
+
+/** Renders full-screen layers (level-up, exercise page) straight into <body>, so no transformed, clipped or stacked ancestor can offset them. */
+export function Portal({ children }: { children: ReactNode }) {
+  if (typeof document === "undefined") return null;
+  return createPortal(children, document.body);
 }

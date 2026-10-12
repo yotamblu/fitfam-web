@@ -2,6 +2,7 @@
 
 import Button from "../ui/Button";
 import { LogoutIcon } from "./icons";
+import SoundToggle from "./SoundToggle";
 import { ProgressCard } from "./HomeScreen";
 import { Card, Figure, RowList, SectionTitle } from "./primitives";
 import { useSession } from "./Session";
@@ -89,6 +90,14 @@ export default function ProfileScreen() {
               </Card>
             </div>
           </Reveal>
+
+          <div className="flex flex-col gap-3">
+            <SectionTitle>הגדרות</SectionTitle>
+            <Card className="flex items-center justify-between gap-3 py-1 ps-4 pe-2">
+              <span className="text-body-lg">צלילים</span>
+              <SoundToggle />
+            </Card>
+          </div>
 
           <div>
             <Button variant="ghost" onClick={() => void logout()}>

@@ -71,9 +71,32 @@ export function targetDetails(target: StepTarget): string[] {
   return parts;
 }
 
+/** The bank exercises among some targets (the built-in run / swim segments have no exercise page). */
+export function realExercises(targets: StepTarget[]): { id: string; name: string }[] {
+  const seen = new Set<string>();
+  const out: { id: string; name: string }[] = [];
+  for (const t of targets) {
+    const e = t.exercise;
+    if (e && !e.id.startsWith("builtin:") && !seen.has(e.id)) {
+      seen.add(e.id);
+      out.push({ id: e.id, name: e.nameHe });
+    }
+  }
+  return out;
+}
+
+export const MEASURE_LABELS: Record<string, string> = {
+  reps: "חזרות",
+  hold_time: "החזקה בזמן",
+  distance: "מרחק",
+  duration: "משך זמן",
+  calories: "קלוריות",
+  max_effort: "עד כשל",
+};
+
 // ---- the read-only workout preview, built from the same steps the player uses ----
 
-export type PreviewRow = { key: string; name: string; summary: string; youtubeId: string | null };
+export type PreviewRow = { key: string; name: string; summary: string; youtubeId: string | null; exercises: { id: string; name: string }[] };
 export type PreviewSection = { title: string | null; rows: PreviewRow[] };
 
 /** Groups the steps by section and folds the sets of one exercise into one row ("3 סטים · 10 חזרות · מנוחה 60 שניות"). */
@@ -97,6 +120,7 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
         name: (step.targets ?? []).map((t) => t.exercise?.nameHe ?? "תרגיל").join(" + "),
         summary: head.join(" · "),
         youtubeId: null,
+        exercises: realExercises(step.targets ?? []),
       });
       lastKey = "";
       return;
@@ -124,6 +148,7 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
       name,
       summary: summary.join(" · "),
       youtubeId: target.exercise?.youtubeId ?? null,
+      exercises: realExercises([target]),
     });
   });
   return sections;
@@ -162,3 +187,6 @@ export const STATE_LABELS: Record<NodeState, string> = {
   locked: "נעול",
   skipped: "דולג",
 };
+
+/** Set by the guided player when its last step is done, so the workout page can finish the workout and celebrate on arrival. */
+export const FINISH_FLAG = "fitfam.finishWorkout";

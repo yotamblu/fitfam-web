@@ -96,6 +96,9 @@ export type CustomerWorkout = {
   estMinutes: number | null;
   state: NodeState;
   resumeStep: number;
+  levelNumber: number;
+  /** the sport most of this level's workouts are tagged with: it decides the venue painted behind the workout */
+  levelSport: Sport | null;
 };
 
 export type StepTarget = {
@@ -136,6 +139,18 @@ export type Step = {
   targets: StepTarget[] | null;
 };
 
+export type CustomerExercise = {
+  id: string;
+  nameHe: string;
+  sport: Sport;
+  measure: string;
+  equipment: string[];
+  muscleGroups: string[];
+  descriptionHe: string | null;
+  cuesHe: string | null;
+  youtubeId: string | null;
+};
+
 export type StepsResponse = { workoutId: string; resumeStep: number; steps: Step[] };
 
 export type AttemptResult = { passed: boolean; currentLevelNumber: number; levelChanged: boolean; planCompleted: boolean };
@@ -163,6 +178,7 @@ export const api = {
   roadmap: (slug: string) => request<Roadmap>(`/me/plans/${encodeURIComponent(slug)}/roadmap`),
   workout: (id: string) => request<CustomerWorkout>(`/workouts/${id}`),
   steps: (id: string) => request<StepsResponse>(`/workouts/${id}/steps`),
+  exercise: (id: string) => request<CustomerExercise>(`/exercises/${id}`),
   saveProgress: (id: string, resumeStep: number) =>
     request<void>(`/workouts/${id}/progress`, { method: "PUT", body: JSON.stringify({ resumeStep }) }),
   complete: (id: string) => request<Roadmap>(`/workouts/${id}/complete`, { method: "POST" }),

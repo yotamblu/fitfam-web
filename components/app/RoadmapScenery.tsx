@@ -29,6 +29,11 @@ export type Theme = {
 
 const VENUE_OF_SPORT: Record<Sport, Venue> = { running: "track", swimming: "pool", gym: "gym", calisthenics: "park" };
 
+/** The look of the level a workout belongs to: the venue of the level's sport and the time of day of its level number. */
+export function themeForWorkout(w: { levelSport: Sport | null; sport: Sport; levelNumber: number }): Theme {
+  return themeFor(VENUE_OF_SPORT[w.levelSport ?? w.sport], Math.max(0, w.levelNumber - 1));
+}
+
 /** The venue of a level: the one for the sport most of its workouts are tagged with (null while it has no workouts). */
 export function dominantVenue(sports: Sport[]): Venue | null {
   if (sports.length === 0) return null;
