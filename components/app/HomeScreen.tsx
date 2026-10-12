@@ -10,7 +10,7 @@ import ProgressBar from "../ui/ProgressBar";
 import { CheckIcon, ChevronLeftIcon, FlameIcon, PlayIcon } from "./icons";
 import { Card, Meta, RowList, SectionTitle } from "./primitives";
 import { useSession } from "./Session";
-import { CountUp, Reveal, Skeleton } from "./ui";
+import { CountUp, ProgressRing, Reveal, Skeleton } from "./ui";
 
 /** Today: the one workout to do now, this week at a glance, and the other plans as a quiet list. */
 export default function HomeScreen() {
@@ -56,17 +56,17 @@ export default function HomeScreen() {
           <p className="mt-1 text-body-md text-text-secondary">עדיין לא שייכנו לכם תוכנית אימון. נעדכן ברגע שהיא מוכנה.</p>
         </Card>
       ) : (
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-x-10">
-          {/* phones: today, then progress, then the rest. Wide screens: progress becomes the side column */}
-          <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+        <div className="flex flex-col gap-6 lg:max-w-3xl">
+          {/* who you are and how far you are first, then the one workout to do, then the rest */}
+          <div className="min-w-0">{stats ? <ProgressCard stats={stats} user={user} /> : <Skeleton className="h-64" />}</div>
+
+          <div className="min-w-0">
             {!roadmaps && !error && <Skeleton className="h-60" />}
             {primary && <TodayCard roadmap={primary} reward={stats?.rewards} />}
           </div>
 
-          <div className="lg:sticky lg:top-8 lg:col-start-2 lg:row-span-3 lg:row-start-1">{stats ? <ProgressCard stats={stats} /> : <Skeleton className="h-64" />}</div>
-
           {others.length > 0 && (
-            <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+            <div className="min-w-0">
               <Reveal>
                 <div className="flex flex-col gap-3">
                   <SectionTitle>התוכניות שלי</SectionTitle>
@@ -81,7 +81,7 @@ export default function HomeScreen() {
           )}
 
           {stats && (
-            <div className="min-w-0 lg:col-start-1 lg:row-start-3">
+            <div className="min-w-0">
               <WeeksChart stats={stats} />
             </div>
           )}
@@ -178,12 +178,36 @@ function OtherPlan({ roadmap, onOpen }: { roadmap: Roadmap; onOpen: () => void }
 // ---------- progress ----------
 
 /** Level, this week and the streak in one grouped surface, so the three facts read as one glance. */
-export function ProgressCard({ stats }: { stats: Stats }) {
+export function ProgressCard({ stats, user }: { stats: Stats; user?: { displayName: string | null; email: string; avatarUrl: string | null } }) {
   const toNext = stats.xpForNextLevel - stats.xpIntoLevel;
   const left = Math.max(0, stats.weeklyGoal - stats.weekCount);
   return (
     <Card className="ff-rise-in divide-y divide-white/[0.06] [animation-delay:120ms]">
       <div className="p-5">
+        {user && (
+          <div className="mb-4 flex items-center gap-3">
+            {/* the ring is the progress to the next level; the badge is the current level */}
+            <div className="relative shrink-0 pb-2" aria-label={`רמה ${stats.level}`}>
+              <ProgressRing value={ratio(stats.xpIntoLevel, stats.xpForNextLevel)} size={80} stroke={5}>
+                <span className="flex size-[62px] items-center justify-center overflow-hidden rounded-full bg-surface-raised font-heading text-headline-sm font-bold">
+                  {user.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" referrerPolicy="no-referrer" className="size-full object-cover" />
+                  ) : (
+                    (user.displayName ?? user.email).slice(0, 1).toUpperCase()
+                  )}
+                </span>
+              </ProgressRing>
+              <span
+                dir="ltr"
+                className="absolute bottom-0 left-1/2 flex h-6 min-w-6 -translate-x-1/2 items-center justify-center rounded-full border-2 border-surface bg-ember px-1.5 font-heading text-label-md font-bold tabular-nums text-canvas"
+              >
+                {stats.level}
+              </span>
+            </div>
+            <p className="min-w-0 truncate font-heading text-body-lg font-bold">{user.displayName ?? user.email}</p>
+          </div>
+        )}
         <div className="flex items-baseline justify-between gap-3">
           <p className="font-heading text-body-lg font-bold">
             רמה <CountUp value={stats.level} /> · {rankTitle(stats.level)}
