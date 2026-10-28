@@ -61,7 +61,7 @@ export type MyPlan = {
 export type RoadmapWorkout = {
   id: string;
   sortOrder: number;
-  type: "regular" | "challenge";
+  type: "regular" | "checkpoint" | "challenge";
   sport: Sport;
   titleHe: string | null;
   estMinutes: number | null;
@@ -88,7 +88,7 @@ export type Roadmap = {
 
 export type CustomerWorkout = {
   id: string;
-  type: "regular" | "challenge";
+  type: "regular" | "checkpoint" | "challenge";
   sport: Sport;
   titleHe: string | null;
   descriptionHe: string | null;
@@ -99,6 +99,26 @@ export type CustomerWorkout = {
   levelNumber: number;
   /** the sport most of this level's workouts are tagged with: it decides the venue painted behind the workout */
   levelSport: Sport | null;
+};
+
+/** A personal running pace: seconds per km from the fast to the slow end (null until the customer enters a 5 km time). */
+export type PaceInfo = {
+  kind: "easy" | "threshold" | "interval" | "fivek";
+  labelHe: string;
+  feelHe: string;
+  fastSecPerKm: number | null;
+  slowSecPerKm: number | null;
+  /** target time of one distance repeat, in seconds (only for repeats measured in metres) */
+  repFastSec: number | null;
+  repSlowSec: number | null;
+};
+
+export type PaceStatus = {
+  fiveKSec: number | null;
+  updatedAt: string | null;
+  /** true when the customer follows a running plan but has not entered a 5 km time */
+  needed: boolean;
+  paces: PaceInfo[];
 };
 
 export type StepTarget = {
@@ -120,6 +140,7 @@ export type StepTarget = {
   rpe: number | null;
   loadHe: string | null;
   notesHe: string | null;
+  pace: PaceInfo | null;
 };
 
 export type Step = {
@@ -174,6 +195,9 @@ export type Stats = {
 export const api = {
   me: () => request<CurrentUser>("/auth/me"),
   stats: () => request<Stats>("/me/stats"),
+  pace: () => request<PaceStatus>("/me/pace"),
+  setPace: (fiveKSec: number) => request<PaceStatus>("/me/pace", { method: "PUT", body: JSON.stringify({ fiveKSec }) }),
+  clearPace: () => request<PaceStatus>("/me/pace", { method: "DELETE" }),
   myPlans: () => request<MyPlan[]>("/me/plans"),
   roadmap: (slug: string) => request<Roadmap>(`/me/plans/${encodeURIComponent(slug)}/roadmap`),
   workout: (id: string) => request<CustomerWorkout>(`/workouts/${id}`),
@@ -203,6 +227,7 @@ const MESSAGES: Record<string, string> = {
   workout_locked: "האימון הזה עוד נעול. מסיימים לפי הסדר.",
   challenge_not_available: "האתגר הזה עדיין לא זמין.",
   not_found: "לא מצאנו את מה שחיפשתם.",
+  invalid_five_k: "זמן ה־5 ק״מ צריך להיות בין 12:00 ל־70:00.",
 };
 
 /** A Hebrew, user-facing message for an error thrown while logging in. */

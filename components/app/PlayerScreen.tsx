@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, describeError, type CustomerWorkout, type Step } from "@/lib/api";
 import { haptic, sfx } from "@/lib/sfx";
 import { BLOCK_LABELS, FINISH_FLAG, ZONE_HINT, clock, formatSeconds, targetDetails, targetHeadline, targetParts } from "@/lib/training";
+import { paceRange, repRange } from "@/lib/pace";
 import Button from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
 import ExerciseSheet from "./ExerciseSheet";
@@ -248,6 +249,7 @@ export default function PlayerScreen() {
                 <span dir="ltr">+15</span>
               </Button>
             </div>
+            {step.blockNotes && <p className="max-w-sm text-body-md text-text-secondary">{step.blockNotes}</p>}
             {nextStep?.target && (
               <p className="text-body-md text-text-secondary">
                 הבא: <span className="font-semibold text-text-primary">{nextStep.target.exercise?.nameHe ?? "תרגיל"}</span>
@@ -309,9 +311,26 @@ export default function PlayerScreen() {
                 {parts.unit && remaining === null && <span className="font-heading text-headline-sm font-medium text-text-secondary">{parts.unit}</span>}
               </div>
 
-              {(targetDetails(target).length > 0 || target.zone !== null) && (
+              {target.pace && (
+                <div className="rounded-2xl bg-surface-raised p-4">
+                  <p className="text-label-md font-semibold text-text-secondary">{target.pace.labelHe}</p>
+                  {paceRange(target.pace) ? (
+                    <p dir="ltr" className="mt-1 text-start font-heading text-headline-md font-bold tabular-nums">
+                      {paceRange(target.pace)} <span className="text-body-md font-medium text-text-secondary">/km</span>
+                    </p>
+                  ) : null}
+                  {repRange(target.pace) && (
+                    <p className="mt-1 text-body-md text-text-secondary">
+                      זמן לחזרה <span dir="ltr" className="font-bold tabular-nums text-text-primary">{repRange(target.pace)}</span>
+                    </p>
+                  )}
+                  <p className="mt-1 text-body-md text-text-secondary">{target.pace.feelHe}</p>
+                </div>
+              )}
+
+              {(targetDetails(target, false).length > 0 || target.zone !== null) && (
                 <div>
-                  <Meta items={targetDetails(target)} />
+                  <Meta items={targetDetails(target, false)} />
                   {target.zone !== null && <p className="mt-1 text-label-md text-text-muted">{ZONE_HINT}</p>}
                 </div>
               )}

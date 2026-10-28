@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ApiError, api, describeError, type CurrentUser, type MyPlan, type Stats } from "@/lib/api";
+import { ApiError, api, describeError, type CurrentUser, type MyPlan, type PaceStatus, type Stats } from "@/lib/api";
 import { isRunning, sfx } from "@/lib/sfx";
 import { releaseSplash } from "@/lib/splash";
 import Image from "next/image";
@@ -14,6 +14,10 @@ type SessionValue = {
   /** Points, account level and weekly streak; null only while they load or if that call failed. */
   stats: Stats | null;
   reloadStats: () => Promise<Stats | null>;
+  /** The customer's 5 km time and personal paces; null only while they load. */
+  pace: PaceStatus | null;
+  savePace: (fiveKSec: number) => Promise<void>;
+  clearPace: () => Promise<void>;
   /** The plan the roadmap tab shows; the customer's most recent choice, else the first plan. */
   activePlan: MyPlan | null;
   setActiveSlug: (slug: string) => void;
@@ -46,6 +50,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [plans, setPlans] = useState<MyPlan[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [pace, setPace] = useState<PaceStatus | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,12 +80,13 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null)])
-      .then(([me, myPlans, myStats]) => {
+    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null)])
+      .then(([me, myPlans, myStats, myPace]) => {
         if (cancelled) return;
         setUser(me);
         setPlans(myPlans);
         setStats(myStats);
+        setPace(myPace);
         setSlug(readStoredSlug());
         setError(null);
       })
@@ -123,6 +129,15 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // errors are thrown to the caller (the form shows them)
+  const savePace = useCallback(async (fiveKSec: number) => {
+    setPace(await api.setPace(fiveKSec));
+  }, []);
+
+  const clearPace = useCallback(async () => {
+    setPace(await api.clearPace());
+  }, []);
+
   const reloadPlans = useCallback(async () => {
     try {
       setPlans(await api.myPlans());
@@ -151,8 +166,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionValue | null>(() => {
     if (!user || !plans) return null;
     const activePlan = plans.find((p) => p.planSlug === slug) ?? plans[0] ?? null;
-    return { user, plans, stats, reloadStats, activePlan, setActiveSlug, reloadPlans, logout };
-  }, [user, plans, stats, reloadStats, slug, setActiveSlug, reloadPlans, logout]);
+    return { user, plans, stats, reloadStats, pace, savePace, clearPace, activePlan, setActiveSlug, reloadPlans, logout };
+  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, slug, setActiveSlug, reloadPlans, logout]);
 
   if (error) {
     return (

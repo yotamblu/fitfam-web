@@ -1,6 +1,7 @@
 // Display helpers for plans, workouts and the guided player (Hebrew copy, formatting, the exercise preview list).
 
 import type { NodeState, Roadmap, RoadmapWorkout, Sport, Step, StepTarget } from "./api";
+import { paceLine, repLine } from "./pace";
 
 export const SPORT_LABELS: Record<Sport, string> = {
   running: "ריצה",
@@ -63,8 +64,13 @@ export function targetHeadline(target: StepTarget): string {
   return "עד כשל";
 }
 
-export function targetDetails(target: StepTarget): string[] {
+export function targetDetails(target: StepTarget, withPace = true): string[] {
   const parts: string[] = [];
+  if (withPace && target.pace) {
+    parts.push(paceLine(target.pace));
+    const rep = repLine(target.pace);
+    if (rep) parts.push(rep);
+  }
   if (target.zone !== null) parts.push(`אזור ${target.zone}`);
   if (target.rpe !== null) parts.push(`RPE ${target.rpe}`);
   if (target.loadHe) parts.push(target.loadHe);
@@ -96,7 +102,7 @@ export const MEASURE_LABELS: Record<string, string> = {
 
 // ---- the read-only workout preview, built from the same steps the player uses ----
 
-export type PreviewRow = { key: string; name: string; summary: string; youtubeId: string | null; exercises: { id: string; name: string }[] };
+export type PreviewRow = { key: string; name: string; summary: string; extra: string[]; youtubeId: string | null; exercises: { id: string; name: string }[] };
 export type PreviewSection = { title: string | null; rows: PreviewRow[] };
 
 /** Groups the steps by section and folds the sets of one exercise into one row ("3 סטים · 10 חזרות · מנוחה 60 שניות"). */
@@ -119,6 +125,7 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
         key: `t${i}`,
         name: (step.targets ?? []).map((t) => t.exercise?.nameHe ?? "תרגיל").join(" + "),
         summary: head.join(" · "),
+        extra: [],
         youtubeId: null,
         exercises: realExercises(step.targets ?? []),
       });
@@ -140,13 +147,25 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
     if (step.roundNumber !== null && step.roundCount !== null && step.roundNumber === 1) {
       summary.push(`${step.roundCount} סבבים`);
     }
-    summary.push(targetHeadline(target), ...targetDetails(target));
+    summary.push(targetHeadline(target), ...targetDetails(target, false));
     const next = steps[i + 1];
     if (next && next.type === "rest" && next.durationSec) summary.push(`מנוחה ${formatSeconds(next.durationSec)}`);
+    // running pace and the coach's remarks go on their own lines so the summary stays short
+    const extra: string[] = [];
+    if (target.pace) {
+      extra.push(paceLine(target.pace));
+      const rep = repLine(target.pace);
+      if (rep) extra.push(rep);
+    }
+    if (step.blockStyle === "endurance") {
+      if (target.notesHe) extra.push(target.notesHe);
+      if (step.blockNotes) extra.push(step.blockNotes);
+    }
     section.rows.push({
       key: `w${i}`,
       name,
       summary: summary.join(" · "),
+      extra,
       youtubeId: target.exercise?.youtubeId ?? null,
       exercises: realExercises([target]),
     });

@@ -7,6 +7,7 @@ import { WEEKDAY_LETTERS, rankTitle, ratio } from "@/lib/gamify";
 import { SPORT_LABELS, levelProgress, nextUp } from "@/lib/training";
 import { buttonClasses } from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
+import PaceWidget from "./PaceWidget";
 import { CheckIcon, ChevronLeftIcon, FlameIcon, PlayIcon } from "./icons";
 import { Card, Meta, RowList, SectionTitle } from "./primitives";
 import { releaseSplash } from "@/lib/splash";
@@ -71,6 +72,8 @@ export default function HomeScreen() {
             {!roadmaps && !error && <Skeleton className="h-60" />}
             {primary && <TodayCard roadmap={primary} reward={stats?.rewards} />}
           </div>
+
+          <PaceWidget />
 
           {others.length > 0 && (
             <div className="min-w-0">

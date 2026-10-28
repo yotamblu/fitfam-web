@@ -104,6 +104,7 @@ export default function WorkoutScreen() {
   if (outcome) return <OutcomeView outcome={outcome} theme={theme} onBack={() => router.replace("/home")} />;
 
   const isChallenge = workout?.type === "challenge";
+  const isCheckpoint = workout?.type === "checkpoint";
   const done = workout?.state === "done";
   const preview = data ? buildPreview(data.steps) : [];
   const resuming = (workout?.resumeStep ?? 0) > 0;
@@ -123,12 +124,12 @@ export default function WorkoutScreen() {
         <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-12">
           <div className="flex min-w-0 flex-col gap-6">
             <section className="ff-rise-in">
-              <Meta items={[isChallenge ? "אתגר מעבר רמה" : SPORT_LABELS[workout.sport], workout.estMinutes !== null && `${workout.estMinutes} דק׳`, done && "הושלם"]} />
+              <Meta items={[isChallenge ? "אתגר מעבר רמה" : isCheckpoint ? "נקודת ביקורת" : SPORT_LABELS[workout.sport], workout.estMinutes !== null && `${workout.estMinutes} דק׳`, done && "הושלם"]} />
               <h2 className="mt-2 font-heading text-[30px] font-bold leading-10 [text-shadow:0_2px_16px_rgba(0,0,0,0.55)] lg:text-[40px] lg:leading-[48px]">{workout.titleHe ?? "אימון"}</h2>
               {workout.descriptionHe && <p className="mt-2 text-body-lg text-text-secondary">{workout.descriptionHe}</p>}
             </section>
 
-            {isChallenge && workout.goalHe && (
+            {(isChallenge || isCheckpoint) && workout.goalHe && (
               <Card className="ff-rise-in border-s-4 border-ember p-5 [animation-delay:60ms]">
                 <p className="text-label-md font-semibold text-ember">המטרה</p>
                 <p className="mt-1 font-heading text-headline-sm font-bold">{workout.goalHe}</p>
@@ -153,6 +154,11 @@ export default function WorkoutScreen() {
                             <span className="flex min-w-0 flex-1 flex-col gap-1">
                               <span className="font-heading text-body-lg font-bold">{row.name}</span>
                               <span className="text-body-md text-text-secondary">{row.summary}</span>
+                              {row.extra.map((line) => (
+                                <span key={line} className="text-body-md text-text-secondary/80">
+                                  {line}
+                                </span>
+                              ))}
                             </span>
                             <ChevronLeftIcon className="size-5 shrink-0 text-text-muted" />
                           </button>
@@ -160,6 +166,11 @@ export default function WorkoutScreen() {
                           <div className="flex flex-col gap-1 px-4 py-3.5">
                             <span className="font-heading text-body-lg font-bold">{row.name}</span>
                             <span className="text-body-md text-text-secondary">{row.summary}</span>
+                              {row.extra.map((line) => (
+                                <span key={line} className="text-body-md text-text-secondary/80">
+                                  {line}
+                                </span>
+                              ))}
                             {row.exercises.length > 1 && (
                               <span className="mt-1 flex flex-wrap gap-2">
                                 {row.exercises.map((e) => (

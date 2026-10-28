@@ -322,6 +322,7 @@ function Stop({
   const { workout } = point;
   const [ref, seen] = useInView<HTMLDivElement>();
   const challenge = workout.type === "challenge";
+  const checkpoint = workout.type === "checkpoint";
   const openable = workout.state === "done" || workout.state === "current" || workout.state === "open" || workout.canAttempt;
   const points = challenge ? rewards.challenge : rewards.workout;
   const size = challenge ? "clamp(80px, 26cqw, 124px)" : "clamp(66px, 21cqw, 100px)";
@@ -367,9 +368,10 @@ function Stop({
         </span>
       )}
       {challenge && workout.state !== "locked" && workout.state !== "skipped" && (
-        <>
-          <StarIcon filled className="absolute -start-1 -top-2 size-5 text-[#ffd54a]" />
-        </>
+        <StarIcon filled className="absolute -start-2 -top-4 size-9 text-[#ffd54a] drop-shadow-[0_0_8px_rgba(255,213,74,0.9)]" />
+      )}
+      {checkpoint && (
+        <StarIcon filled className={`absolute -start-1.5 -top-2.5 size-6 text-[#ffd54a] drop-shadow-[0_0_4px_rgba(255,213,74,0.8)] ${muted ? "opacity-60" : ""}`} />
       )}
     </span>
   );
@@ -390,7 +392,7 @@ function Stop({
           {openable ? (
             <Link
               href={`/workout/${workout.id}`}
-              aria-label={`${challenge ? "אתגר מעבר רמה" : `אימון ${point.number}`}: ${workout.titleHe ?? ""}`}
+              aria-label={`${challenge ? "אתגר מעבר רמה" : checkpoint ? `נקודת ביקורת, אימון ${point.number}` : `אימון ${point.number}`}: ${workout.titleHe ?? ""}`}
               className="relative rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
               {node}

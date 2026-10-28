@@ -2,6 +2,7 @@
 
 import Button from "../ui/Button";
 import { LogoutIcon } from "./icons";
+import PaceSettings from "./PaceSettings";
 import SoundModeToggle from "./SoundModeToggle";
 import SoundTest from "./SoundTest";
 import SoundToggle from "./SoundToggle";
@@ -95,6 +96,7 @@ export default function ProfileScreen() {
 
           <div className="flex flex-col gap-3">
             <SectionTitle>הגדרות</SectionTitle>
+            <PaceSettings />
             <Card className="divide-y divide-white/[0.06]">
               <div className="flex items-center justify-between gap-3 py-1 ps-4 pe-2">
                 <span className="text-body-lg">צלילים</span>
