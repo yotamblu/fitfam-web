@@ -302,6 +302,9 @@ function Banner({ point, total, index, theme }: { point: Extract<Pt, { kind: "ba
   );
 }
 
+/** A chunky five-point star in a 100x100 box: the shape of a level challenge. */
+const STAR_PATH = "M50.0,7.0 L64.7,32.8 L93.7,38.8 L73.8,60.7 L77.0,90.2 L50.0,78.0 L23.0,90.2 L26.2,60.7 L6.3,38.8 L35.3,32.8Z";
+
 // ---------- one stop on the road: a glossy button with its number ----------
 
 function Stop({
@@ -325,7 +328,7 @@ function Stop({
   const checkpoint = workout.type === "checkpoint";
   const openable = workout.state === "done" || workout.state === "current" || workout.state === "open" || workout.canAttempt;
   const points = challenge ? rewards.challenge : rewards.workout;
-  const size = challenge ? "clamp(80px, 26cqw, 124px)" : "clamp(66px, 21cqw, 100px)";
+  const size = challenge ? "clamp(104px, 34cqw, 156px)" : "clamp(66px, 21cqw, 100px)";
 
   const [face, edge] =
     workout.state === "done"
@@ -339,7 +342,26 @@ function Stop({
             : [theme.locked, theme.lockedDark];
   const muted = workout.state === "locked" || workout.state === "skipped";
 
-  const node = (
+  const doneBadge = workout.state === "done" && (
+    <span className="absolute -end-1 -top-1 flex size-[30%] items-center justify-center rounded-full border-2 border-white bg-[#22c55e] text-white shadow">
+      <CheckIcon className="size-[62%]" />
+    </span>
+  );
+
+  const node = challenge ? (
+    <span
+      className={`relative flex items-center justify-center transition-transform duration-150 ${openable ? "active:translate-y-[5px]" : ""} ${workout.state === "skipped" ? "opacity-50" : ""}`}
+      style={{ width: size, height: size, filter: muted ? undefined : "drop-shadow(0 0 10px rgba(255,213,74,0.55))" }}
+    >
+      <svg viewBox="0 0 100 100" aria-hidden="true" className="absolute inset-0 size-full overflow-visible" strokeLinejoin="round">
+        <path d={STAR_PATH} transform="translate(0 6)" fill={edge} stroke={edge} strokeWidth="6" />
+        <path d={STAR_PATH} fill={face} stroke="rgba(255,255,255,0.85)" strokeWidth="4" />
+        <path d={STAR_PATH} transform="translate(-1.5 -2.5) scale(0.9)" style={{ transformOrigin: "50% 53%" }} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="2.5" />
+      </svg>
+      <FlagIcon className="relative mt-[8%] size-[34%] text-white drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]" />
+      {doneBadge}
+    </span>
+  ) : (
     <span
       className={`relative flex items-center justify-center rounded-full border-[3px] border-white/80 font-heading font-bold text-white transition-transform duration-150 ${
         openable ? "active:translate-y-[5px]" : ""
@@ -350,25 +372,18 @@ function Stop({
           height: size,
           backgroundColor: face,
           boxShadow: `0 6px 0 ${edge}`,
-          fontSize: challenge ? "clamp(28px, 9cqw, 44px)" : "clamp(24px, 7.6cqw, 36px)",
+          fontSize: "clamp(24px, 7.6cqw, 36px)",
           textShadow: "0 1px 0 rgba(0,0,0,0.3)",
         } as CSSProperties
       }
     >
       <span aria-hidden="true" className="pointer-events-none absolute start-[16%] top-[11%] h-[16%] w-[32%] -rotate-[24deg] rounded-full bg-white/30" />
-      {challenge ? <FlagIcon className="size-[44%]" /> : <span dir="ltr" className="relative">{point.number}</span>}
-      {workout.state === "done" && (
-        <span className="absolute -end-1 -top-1 flex size-[34%] items-center justify-center rounded-full border-2 border-white bg-[#22c55e] text-white shadow">
-          <CheckIcon className="size-[62%]" />
-        </span>
-      )}
-      {muted && !challenge && (
+      <span dir="ltr" className="relative">{point.number}</span>
+      {doneBadge}
+      {muted && (
         <span className="absolute -bottom-1 -end-1 flex size-[34%] items-center justify-center rounded-full border-2 border-white/80 bg-black/55 text-white">
           <LockIcon className="size-[58%]" />
         </span>
-      )}
-      {challenge && workout.state !== "locked" && workout.state !== "skipped" && (
-        <StarIcon filled className="absolute -start-2 -top-4 size-9 text-[#ffd54a] drop-shadow-[0_0_8px_rgba(255,213,74,0.9)]" />
       )}
       {checkpoint && (
         <StarIcon filled className={`absolute -start-1.5 -top-2.5 size-6 text-[#ffd54a] drop-shadow-[0_0_4px_rgba(255,213,74,0.8)] ${muted ? "opacity-60" : ""}`} />
@@ -382,7 +397,13 @@ function Stop({
         <div ref={isCurrent ? refs?.currentRef : undefined} className="relative flex flex-col items-center">
           {isCurrent && (
             <>
-              <span aria-hidden="true" className="ff-ring pointer-events-none absolute rounded-full border-[3px] border-white" style={{ width: size, height: size }} />
+              {challenge ? (
+                <svg viewBox="0 0 100 100" aria-hidden="true" className="ff-ring pointer-events-none absolute overflow-visible" style={{ width: size, height: size }} strokeLinejoin="round">
+                  <path d={STAR_PATH} fill="none" stroke="white" strokeWidth="3" />
+                </svg>
+              ) : (
+                <span aria-hidden="true" className="ff-ring pointer-events-none absolute rounded-full border-[3px] border-white" style={{ width: size, height: size }} />
+              )}
               <div ref={refs?.watchRef} className="ff-bob absolute -top-11 z-10 whitespace-nowrap rounded-lg bg-white px-3 py-1.5 font-heading text-body-md font-bold text-canvas">
                 {challenge ? "האתגר" : "כאן"}
                 <span aria-hidden="true" className="absolute -bottom-1 left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-white" />
