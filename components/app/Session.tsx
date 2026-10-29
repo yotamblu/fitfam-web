@@ -80,8 +80,14 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    // a connection that never answers must not hold the splash forever: after a minute, offer a retry
+    // (switched off as soon as the load finishes, either way, so a healthy session never gets this error)
+    const giveUp = window.setTimeout(() => {
+      if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
+    }, 60000);
     Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null)])
       .then(([me, myPlans, myStats, myPace]) => {
+        window.clearTimeout(giveUp);
         if (cancelled) return;
         setUser(me);
         setPlans(myPlans);
@@ -91,6 +97,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
         setError(null);
       })
       .catch((e) => {
+        window.clearTimeout(giveUp);
         if (cancelled) return;
         if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
           // the session is gone: clear the cookie (so the welcome page is not skipped again), then show the welcome page
@@ -102,10 +109,6 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
         }
         setError(describeError(e));
       });
-    // a connection that never answers must not hold the splash forever: after a minute, offer a retry
-    const giveUp = window.setTimeout(() => {
-      if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
-    }, 60000);
     return () => {
       cancelled = true;
       window.clearTimeout(giveUp);
