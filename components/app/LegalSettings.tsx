@@ -58,17 +58,13 @@ export default function LegalSettings() {
       <Card className="divide-y divide-white/[0.06]" aria-label="פרטיות ומשפטי">
         <div className="flex flex-col gap-1 p-4">
           <h3 className="font-heading text-body-lg font-bold">הצהרת בריאות</h3>
-          {consent && consent.required ? (
-            <p className="text-body-md text-text-secondary">
-              {health?.current
-                ? `בתוקף עד ${formatLegalDate(health.expiresAt)}.`
-                : health
-                  ? "פג תוקף. יש למלא הצהרה חדשה."
-                  : "עוד לא מולאה."}
-            </p>
-          ) : (
-            <p className="text-body-md text-text-secondary">חשבון ניהול אינו חייב בהצהרה.</p>
-          )}
+          <p className="text-body-md text-text-secondary">
+            {health?.current
+              ? `בתוקף עד ${formatLegalDate(health.expiresAt)}.`
+              : health
+                ? "פג תוקף. יש למלא הצהרה חדשה."
+                : "עוד לא מולאה."}
+          </p>
           <div className="mt-2">
             <Button variant="secondary" size="sm" onClick={() => setUpdating(true)} disabled={!consent}>
               {health ? "עדכון ההצהרה" : "מילוי ההצהרה"}

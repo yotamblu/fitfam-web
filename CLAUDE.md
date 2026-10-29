@@ -56,7 +56,7 @@ The design system was reverse-engineered from a Google Stitch export (`/design-r
 - **Legal screens (2026-10-29):** public `/terms` and `/privacy` (`components/legal/*`, texts in Hebrew; operator details come from the SERVER env vars
   `LEGAL_OPERATOR_NAME`, `LEGAL_OPERATOR_ID`, `LEGAL_CONTACT_EMAIL`, optional `LEGAL_ADDRESS`; unset = a visible placeholder) and `components/app/ConsentFlow.tsx`,
   which `Session.tsx` shows INSTEAD of the app until the customer has accepted the current terms/privacy and has a valid health declaration
-  (`GET /me/consents`; admins are exempt). The health declaration is a read-only list of conditions (`HEALTH_CONDITIONS`) plus one declaration tick, three confirmations and a typed name. Versions live in `lib/legal.ts` and must match the API's `LegalVersions`;
+  (`GET /me/consents`; admins are NOT exempt, so the team sees the same flow). The health declaration is a read-only list of conditions (`HEALTH_CONDITIONS`) plus one declaration tick, three confirmations and a typed name. Versions live in `lib/legal.ts` and must match the API's `LegalVersions`;
   bump the version when a text changes materially so everyone is asked again. Profile > "פרטיות ומשפטי" (`LegalSettings.tsx`): renew the declaration,
   download the customer's data, delete the account. `/preview-consent` (development only, 404 in production) shows the two steps without a session.
 - **Skipped levels:** workouts the API marks `open` (unfinished regular workouts below the current level) are openable from the roadmap in any order (blue stop, banner badge "פתוח"); their challenge stays closed.
