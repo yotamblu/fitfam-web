@@ -192,6 +192,28 @@ export type Stats = {
   rewards: { workout: number; challenge: number };
 };
 
+export type ConsentStatus = {
+  required: boolean;
+  ok: boolean;
+  termsVersion: string;
+  privacyVersion: string;
+  healthVersion: string;
+  questionIds: string[];
+  terms: { version: string; acceptedAt: string; current: boolean } | null;
+  health: { version: string; declaredAt: string; expiresAt: string; current: boolean; medicalClearance: boolean } | null;
+};
+
+export type HealthInput = {
+  version: string;
+  answers: Record<string, boolean>;
+  medicalClearance: boolean;
+  riskAcknowledged: boolean;
+  accuracyConfirmed: boolean;
+  dataConsent: boolean;
+  adult: boolean;
+  fullName: string;
+};
+
 export const api = {
   me: () => request<CurrentUser>("/auth/me"),
   stats: () => request<Stats>("/me/stats"),
@@ -214,6 +236,13 @@ export const api = {
       body: JSON.stringify({ credential }),
     }),
   logout: () => request<void>("/auth/logout", { method: "POST" }),
+  consents: () => request<ConsentStatus>("/me/consents"),
+  acceptTerms: (termsVersion: string, privacyVersion: string) =>
+    request<ConsentStatus>("/me/consents/terms", { method: "POST", body: JSON.stringify({ termsVersion, privacyVersion, adult: true }) }),
+  declareHealth: (input: HealthInput) =>
+    request<ConsentStatus>("/me/consents/health", { method: "POST", body: JSON.stringify(input) }),
+  exportData: () => request<Record<string, unknown>>("/me/export"),
+  deleteAccount: () => request<void>("/me", { method: "DELETE" }),
 };
 
 const MESSAGES: Record<string, string> = {
@@ -227,6 +256,14 @@ const MESSAGES: Record<string, string> = {
   workout_locked: "האימון הזה עוד נעול. מסיימים לפי הסדר.",
   challenge_not_available: "האתגר הזה עדיין לא זמין.",
   not_found: "לא מצאנו את מה שחיפשתם.",
+  version_outdated: "הנוסח התעדכן. רעננו את הדף ונסו שוב.",
+  adult_required: "השירות מיועד לבני 18 ומעלה.",
+  answers_incomplete: "יש לענות על כל השאלות.",
+  confirmations_required: "יש לאשר את כל ההצהרות.",
+  name_required: "יש להקליד שם מלא.",
+  medical_clearance_required: "כשיש תשובה ״כן״ צריך אישור רפואי לפני שמתחילים.",
+  consent_required: "לפני שמתאמנים צריך לאשר את התנאים ולמלא הצהרת בריאות.",
+  admin_cannot_self_delete: "אי אפשר למחוק כך חשבון של מנהל.",
   invalid_five_k: "זמן ה־5 ק״מ צריך להיות בין 12:00 ל־70:00.",
 };
 

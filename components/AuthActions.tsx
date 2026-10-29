@@ -96,6 +96,10 @@ export default function AuthActions() {
         <GoogleButtonOverlay ready={googleStatus === "ready"} text="continue_with" />
       </div>
 
+      <p className="text-center text-label-md text-text-muted">
+        בכניסה תתבקשו לאשר את <a href="/terms" className="underline">תנאי השימוש</a> ואת <a href="/privacy" className="underline">מדיניות הפרטיות</a>.
+      </p>
+
       {busy && (
         <p role="status" aria-live="polite" className="text-center text-body-md text-text-secondary">
           מתחבר...

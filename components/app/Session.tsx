@@ -2,11 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ApiError, api, describeError, type CurrentUser, type MyPlan, type PaceStatus, type Stats } from "@/lib/api";
+import { ApiError, api, describeError, type ConsentStatus, type CurrentUser, type MyPlan, type PaceStatus, type Stats } from "@/lib/api";
 import { isRunning, sfx } from "@/lib/sfx";
 import { releaseSplash } from "@/lib/splash";
 import Image from "next/image";
 import Button from "../ui/Button";
+import ConsentFlow from "./ConsentFlow";
 
 type SessionValue = {
   user: CurrentUser;
@@ -18,6 +19,9 @@ type SessionValue = {
   pace: PaceStatus | null;
   savePace: (fiveKSec: number) => Promise<void>;
   clearPace: () => Promise<void>;
+  /** Terms and health declaration state; null only while loading or if that call failed (the API still enforces it). */
+  consent: ConsentStatus | null;
+  setConsent: (status: ConsentStatus) => void;
   /** The plan the roadmap tab shows; the customer's most recent choice, else the first plan. */
   activePlan: MyPlan | null;
   setActiveSlug: (slug: string) => void;
@@ -51,6 +55,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<MyPlan[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [pace, setPace] = useState<PaceStatus | null>(null);
+  const [consent, setConsent] = useState<ConsentStatus | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,14 +90,15 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     const giveUp = window.setTimeout(() => {
       if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
     }, 60000);
-    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null)])
-      .then(([me, myPlans, myStats, myPace]) => {
+    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null), api.consents().catch(() => null)])
+      .then(([me, myPlans, myStats, myPace, myConsent]) => {
         window.clearTimeout(giveUp);
         if (cancelled) return;
         setUser(me);
         setPlans(myPlans);
         setStats(myStats);
         setPace(myPace);
+        setConsent(myConsent);
         setSlug(readStoredSlug());
         setError(null);
       })
@@ -117,9 +123,11 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
 
   // The home screen releases the splash itself once its own data is in; every other screen (and the error screen) when the session is ready.
   const ready = Boolean(user && plans);
+  // the legal steps take the place of the app until they are done (the API refuses training without them anyway)
+  const mustConsent = Boolean(consent && consent.required && !consent.ok);
   useEffect(() => {
-    if (error || (ready && pathname !== "/home")) releaseSplash();
-  }, [error, ready, pathname]);
+    if (error || (ready && (pathname !== "/home" || mustConsent))) releaseSplash();
+  }, [error, ready, pathname, mustConsent]);
 
   const reloadStats = useCallback(async (): Promise<Stats | null> => {
     try {
@@ -169,8 +177,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionValue | null>(() => {
     if (!user || !plans) return null;
     const activePlan = plans.find((p) => p.planSlug === slug) ?? plans[0] ?? null;
-    return { user, plans, stats, reloadStats, pace, savePace, clearPace, activePlan, setActiveSlug, reloadPlans, logout };
-  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, slug, setActiveSlug, reloadPlans, logout]);
+    return { user, plans, stats, reloadStats, pace, savePace, clearPace, consent, setConsent, activePlan, setActiveSlug, reloadPlans, logout };
+  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, consent, slug, setActiveSlug, reloadPlans, logout]);
 
   if (error) {
     return (
@@ -191,6 +199,9 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
         <Image src="/logo-transparent.png" alt="" width={640} height={573} priority className="h-auto w-[68vw] max-w-[320px]" />
       </div>
     );
+  }
+  if (consent && mustConsent) {
+    return <ConsentFlow status={consent} onDone={setConsent} onLogout={() => void logout()} />;
   }
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }

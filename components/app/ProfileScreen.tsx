@@ -2,6 +2,7 @@
 
 import Button from "../ui/Button";
 import { LogoutIcon } from "./icons";
+import LegalSettings from "./LegalSettings";
 import PaceSettings from "./PaceSettings";
 import SoundModeToggle from "./SoundModeToggle";
 import SoundTest from "./SoundTest";
@@ -106,6 +107,11 @@ export default function ProfileScreen() {
               <SoundTest />
             </Card>
             <p className="text-label-md text-text-muted">אין צליל באייפון? בדקו שמתג ההשתקה שבצד המכשיר לא במצב שקט, ושעוצמת המדיה מורמת.</p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <SectionTitle>פרטיות ומשפטי</SectionTitle>
+            <LegalSettings />
           </div>
 
           <div>
