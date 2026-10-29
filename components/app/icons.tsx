@@ -114,3 +114,29 @@ export const InfoIcon = ({ className }: IconProps) => (
     <path d="M12 11v5M12 8h.01" />
   </svg>
 );
+export const SparkIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="M12 3c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7z" />
+    <path d="M19 15.5c.2 1.6.9 2.3 2.5 2.5-1.6.2-2.3.9-2.5 2.5-.2-1.6-.9-2.3-2.5-2.5 1.6-.2 2.3-.9 2.5-2.5z" />
+  </svg>
+);
+export const SendIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
+  </svg>
+);
+export const PlusIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+export const TrashIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+  </svg>
+);
+export const PencilIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="m4 20 1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z" />
+  </svg>
+);

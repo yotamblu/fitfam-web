@@ -212,6 +212,21 @@ export type HealthInput = {
   fullName: string;
 };
 
+export type FitbotAction = { type: "open_workout"; workoutId: string; title: string };
+export type FitbotMessage = { id: string; role: "user" | "assistant"; content: string; actions: FitbotAction[]; createdAt: string };
+export type FitbotChatSummary = { id: string; title: string; updatedAt: string };
+export type FitbotChat = FitbotChatSummary & { messages: FitbotMessage[] };
+export type FitbotOverview = {
+  /** false while Fitbot is switched off or not yet open to this customer: the tab is hidden */
+  available: boolean;
+  aiConsent: boolean;
+  dailyLimit: number;
+  usedToday: number;
+  retentionDays: number;
+  chats: FitbotChatSummary[];
+};
+export type FitbotSendResult = { userMessage: FitbotMessage; reply: FitbotMessage; usedToday: number; dailyLimit: number };
+
 export const api = {
   me: () => request<CurrentUser>("/auth/me"),
   stats: () => request<Stats>("/me/stats"),
@@ -241,6 +256,16 @@ export const api = {
     request<ConsentStatus>("/me/consents/health", { method: "POST", body: JSON.stringify(input) }),
   exportData: () => request<Record<string, unknown>>("/me/export"),
   deleteAccount: () => request<void>("/me", { method: "DELETE" }),
+  fitbot: () => request<FitbotOverview>("/me/chats"),
+  fitbotConsent: () => request<FitbotOverview>("/me/chats/consent", { method: "POST" }),
+  createChat: () => request<FitbotChatSummary>("/me/chats", { method: "POST" }),
+  chat: (id: string) => request<FitbotChat>(`/me/chats/${id}`),
+  sendChat: (id: string, message: string) =>
+    request<FitbotSendResult>(`/me/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ message }) }),
+  titleChat: (id: string) => request<FitbotChatSummary>(`/me/chats/${id}/title`, { method: "POST" }),
+  renameChat: (id: string, title: string) =>
+    request<FitbotChatSummary>(`/me/chats/${id}`, { method: "PUT", body: JSON.stringify({ title }) }),
+  deleteChat: (id: string) => request<void>(`/me/chats/${id}`, { method: "DELETE" }),
 };
 
 const MESSAGES: Record<string, string> = {
@@ -261,6 +286,12 @@ const MESSAGES: Record<string, string> = {
   consent_required: "לפני שמתאמנים צריך לאשר את התנאים ולמלא הצהרת בריאות.",
   admin_cannot_self_delete: "אי אפשר למחוק כך חשבון של מנהל.",
   invalid_five_k: "זמן ה־5 ק״מ צריך להיות בין 12:00 ל־70:00.",
+  daily_limit: "הגעתם למגבלת ההודעות להיום. אפשר להמשיך מחר.",
+  fitbot_busy: "Fitbot עמוס כרגע. נסו שוב בעוד רגע.",
+  fitbot_unavailable: "Fitbot לא זמין כרגע.",
+  fitbot_failed: "Fitbot לא הצליח לענות. נסו שוב.",
+  fitbot_empty: "Fitbot לא הצליח לענות. נסו לנסח אחרת.",
+  ai_consent_required: "צריך לאשר את השימוש ב-Fitbot לפני שמתחילים.",
 };
 
 /** A Hebrew, user-facing message for an error thrown while logging in. */
@@ -277,4 +308,10 @@ export function describeError(error: unknown): string {
     return MESSAGES[error.code] ?? "משהו השתבש. נסו שוב.";
   }
   return "אי אפשר להגיע לשרת כרגע. נסו שוב עוד רגע.";
+}
+
+/** The API sends timestamps as Postgres text ("2026-10-29 23:25:04.303342+00"); Safari cannot parse that, so normalise it. */
+export function parseApiDate(value: string): Date {
+  const iso = value.replace(" ", "T").replace(/(\.\d{3})\d+/, "$1").replace(/([+-]\d\d)$/, "$1:00");
+  return new Date(iso);
 }

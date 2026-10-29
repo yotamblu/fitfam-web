@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { ApiError, api, describeError, type ConsentStatus, type CurrentUser, type MyPlan, type PaceStatus, type Stats } from "@/lib/api";
+import { ApiError, api, describeError, type ConsentStatus, type CurrentUser, type FitbotOverview, type MyPlan, type PaceStatus, type Stats } from "@/lib/api";
 import { isRunning, sfx } from "@/lib/sfx";
 import { releaseSplash } from "@/lib/splash";
 import Image from "next/image";
@@ -22,6 +22,9 @@ type SessionValue = {
   /** Terms and health declaration state; null only while loading or if that call failed (the API still enforces it). */
   consent: ConsentStatus | null;
   setConsent: (status: ConsentStatus) => void;
+  /** Fitbot: whether it is open to this customer, the conversations and today's count; null while loading or if that call failed. */
+  fitbot: FitbotOverview | null;
+  setFitbot: (update: (current: FitbotOverview | null) => FitbotOverview | null) => void;
   /** The plan the roadmap tab shows; the customer's most recent choice, else the first plan. */
   activePlan: MyPlan | null;
   setActiveSlug: (slug: string) => void;
@@ -56,6 +59,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<Stats | null>(null);
   const [pace, setPace] = useState<PaceStatus | null>(null);
   const [consent, setConsent] = useState<ConsentStatus | null>(null);
+  const [fitbot, setFitbot] = useState<FitbotOverview | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,8 +94,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     const giveUp = window.setTimeout(() => {
       if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
     }, 60000);
-    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null), api.consents().catch(() => null)])
-      .then(([me, myPlans, myStats, myPace, myConsent]) => {
+    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null), api.consents().catch(() => null), api.fitbot().catch(() => null)])
+      .then(([me, myPlans, myStats, myPace, myConsent, myFitbot]) => {
         window.clearTimeout(giveUp);
         if (cancelled) return;
         setUser(me);
@@ -99,6 +103,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
         setStats(myStats);
         setPace(myPace);
         setConsent(myConsent);
+        setFitbot(myFitbot);
         setSlug(readStoredSlug());
         setError(null);
       })
@@ -177,8 +182,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionValue | null>(() => {
     if (!user || !plans) return null;
     const activePlan = plans.find((p) => p.planSlug === slug) ?? plans[0] ?? null;
-    return { user, plans, stats, reloadStats, pace, savePace, clearPace, consent, setConsent, activePlan, setActiveSlug, reloadPlans, logout };
-  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, consent, slug, setActiveSlug, reloadPlans, logout]);
+    return { user, plans, stats, reloadStats, pace, savePace, clearPace, consent, setConsent, fitbot, setFitbot, activePlan, setActiveSlug, reloadPlans, logout };
+  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, consent, fitbot, slug, setActiveSlug, reloadPlans, logout]);
 
   if (error) {
     return (

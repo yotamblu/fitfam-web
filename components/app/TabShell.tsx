@@ -7,16 +7,17 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { ratio, rankTitle } from "@/lib/gamify";
 import { ChromeContext, DEFAULT_TINT, type Tint } from "./Chrome";
 import GlassTabBar from "./GlassTabBar";
-import { BoltIcon, FlameIcon, HomeIcon, LogoutIcon, RoadIcon, UserIcon } from "./icons";
+import { BoltIcon, FlameIcon, HomeIcon, LogoutIcon, RoadIcon, SparkIcon, UserIcon } from "./icons";
 import { useSession } from "./Session";
 import RoadmapHud from "./RoadmapHud";
 import { ProgressRing } from "./ui";
 
-const TABS = [
+const BASE_TABS = [
   { href: "/home", label: "בית", Icon: HomeIcon },
   { href: "/roadmap", label: "מסלול", Icon: RoadIcon },
   { href: "/profile", label: "פרופיל", Icon: UserIcon },
 ];
+const FITBOT_TAB = { href: "/fitbot", label: "Fitbot", Icon: SparkIcon };
 
 function Avatar({ name, url, size }: { name: string; url: string | null; size: number }) {
   return (
@@ -44,8 +45,12 @@ function Avatar({ name, url, size }: { name: string; url: string | null; size: n
  */
 export default function TabShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { user, stats, logout } = useSession();
+  const { user, stats, logout, fitbot } = useSession();
   const onRoadmap = pathname.startsWith("/roadmap");
+  // Fitbot sits between the roadmap and the profile, only for customers it is open to
+  const TABS = fitbot?.available ? [BASE_TABS[0], BASE_TABS[1], FITBOT_TAB, BASE_TABS[2]] : BASE_TABS;
+  // an open conversation takes the whole phone screen (its own header and message box); the desktop keeps the side bar
+  const inChat = /^\/fitbot\/[^/]+/.test(pathname);
   const [override, setOverride] = useState<Tint | null>(null);
   const name = user.displayName ?? user.email;
 
@@ -152,7 +157,7 @@ export default function TabShell({ children }: { children: ReactNode }) {
 
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           {/* mobile / tablet header: sticks to the top and wears the colour of the zone under it */}
-          <header className="sticky top-0 z-30 border-b backdrop-blur-xl transition-colors duration-700 lg:hidden" style={topBar}>
+          <header className={`sticky top-0 z-30 border-b backdrop-blur-xl transition-colors duration-700 lg:hidden ${inChat ? "hidden" : ""}`} style={topBar}>
             <div className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-gutter pt-[calc(env(safe-area-inset-top)+10px)] pb-2.5">
               <Image src="/logo-transparent.png" alt="FitFam" width={640} height={573} className="h-9 w-auto" priority />
 
@@ -169,11 +174,11 @@ export default function TabShell({ children }: { children: ReactNode }) {
             {onRoadmap && <RoadmapHud className="mx-auto w-full max-w-2xl px-gutter pb-2" />}
           </header>
 
-          <main className={`relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-gutter pb-28 lg:max-w-6xl lg:px-10 lg:pb-12 ${onRoadmap ? "pt-0 lg:pt-6" : "pt-4 lg:pt-10"}`}>{children}</main>
+          <main className={`relative z-10 mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 px-gutter lg:max-w-6xl lg:px-10 lg:pb-12 ${inChat ? "pb-0 pt-0 lg:pt-10" : "pb-28"} ${inChat ? "" : onRoadmap ? "pt-0 lg:pt-6" : "pt-4 lg:pt-10"}`}>{children}</main>
         </div>
 
         {/* phones and tablets: the floating liquid-glass tab bar (drag the lens between tabs) */}
-        <GlassTabBar tabs={TABS} />
+        {!inChat && <GlassTabBar tabs={TABS} />}
       </div>
     </ChromeContext.Provider>
   );

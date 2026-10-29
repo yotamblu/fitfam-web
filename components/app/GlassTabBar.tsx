@@ -112,7 +112,7 @@ export default function GlassTabBar({ tabs }: { tabs: Tab[] }) {
         onPointerMove={onPointerMove}
         onPointerUp={(e) => finish(e)}
         onPointerCancel={(e) => finish(e, true)}
-        className="pointer-events-auto relative mx-auto flex h-[60px] w-full max-w-xs touch-pan-y select-none items-stretch rounded-full p-1.5"
+        className={`pointer-events-auto relative mx-auto flex h-[60px] w-full touch-pan-y select-none items-stretch rounded-full p-1.5 ${tabs.length > 3 ? "max-w-sm" : "max-w-xs"}`}
         style={{
           backgroundColor: "color-mix(in srgb, var(--chrome-bottom) 30%, rgba(22,22,25,0.78))",
           backdropFilter: "blur(20px) saturate(140%)",
