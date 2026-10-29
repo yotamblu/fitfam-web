@@ -208,7 +208,7 @@ export type HealthInput = {
   riskAcknowledged: boolean;
   accuracyConfirmed: boolean;
   dataConsent: boolean;
-  adult: boolean;
+  ageConfirmed: boolean;
   fullName: string;
 };
 
@@ -236,7 +236,7 @@ export const api = {
   logout: () => request<void>("/auth/logout", { method: "POST" }),
   consents: () => request<ConsentStatus>("/me/consents"),
   acceptTerms: (termsVersion: string, privacyVersion: string) =>
-    request<ConsentStatus>("/me/consents/terms", { method: "POST", body: JSON.stringify({ termsVersion, privacyVersion, adult: true }) }),
+    request<ConsentStatus>("/me/consents/terms", { method: "POST", body: JSON.stringify({ termsVersion, privacyVersion, ageConfirmed: true }) }),
   declareHealth: (input: HealthInput) =>
     request<ConsentStatus>("/me/consents/health", { method: "POST", body: JSON.stringify(input) }),
   exportData: () => request<Record<string, unknown>>("/me/export"),
@@ -255,7 +255,7 @@ const MESSAGES: Record<string, string> = {
   challenge_not_available: "האתגר הזה עדיין לא זמין.",
   not_found: "לא מצאנו את מה שחיפשתם.",
   version_outdated: "הנוסח התעדכן. רעננו את הדף ונסו שוב.",
-  adult_required: "השירות מיועד לבני 18 ומעלה.",
+  age_required: "השירות מיועד לבני 13 ומעלה.",
   confirmations_required: "יש לאשר את כל ההצהרות.",
   name_required: "יש להקליד שם מלא.",
   consent_required: "לפני שמתאמנים צריך לאשר את התנאים ולמלא הצהרת בריאות.",

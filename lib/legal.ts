@@ -1,8 +1,8 @@
 // Versions of the legal texts and the health-declaration questions.
 // When a text changes in a way customers must accept again, bump its version here AND in the API
 // (fitfam-api LegalVersions.java); the API asks every customer to accept again.
-export const TERMS_VERSION = "2026-10-29";
-export const PRIVACY_VERSION = "2026-10-29";
+export const TERMS_VERSION = "2026-10-29.2";
+export const PRIVACY_VERSION = "2026-10-29.2";
 export const HEALTH_VERSION = "2026-10-30";
 
 /**

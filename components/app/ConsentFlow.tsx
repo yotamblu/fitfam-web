@@ -40,7 +40,7 @@ function Shell({ title, lead, children, onClose }: { title: string; lead?: strin
 
 function TermsStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
   const [agree, setAgree] = useState(false);
-  const [adult, setAdult] = useState(false);
+  const [ageOk, setAgeOk] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,8 +74,8 @@ function TermsStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
         <Check checked={agree} onChange={setAgree}>
           קראתי ואני מסכים/ה לתנאי השימוש ולמדיניות הפרטיות.
         </Check>
-        <Check checked={adult} onChange={setAdult}>
-          אני בן/בת 18 ומעלה.
+        <Check checked={ageOk} onChange={setAgeOk}>
+          אני בן/בת 13 ומעלה. אם אני מתחת לגיל 18, ההורה או האפוטרופוס שלי יודע שאני משתמש/ת בשירות ומסכים לכך.
         </Check>
       </div>
       {error && (
@@ -83,7 +83,7 @@ function TermsStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
           {error}
         </p>
       )}
-      <Button size="lg" fullWidth disabled={!agree || !adult || busy} onClick={() => void submit()}>
+      <Button size="lg" fullWidth disabled={!agree || !ageOk || busy} onClick={() => void submit()}>
         {busy ? "שומר..." : "המשך"}
       </Button>
     </>
@@ -112,7 +112,7 @@ function HealthStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
           riskAcknowledged: risk,
           accuracyConfirmed: accurate,
           dataConsent: data,
-          adult: true,
+          ageConfirmed: true,
           fullName: name.trim(),
         }),
       );
