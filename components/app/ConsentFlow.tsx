@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { api, describeError, type ConsentStatus } from "@/lib/api";
-import { HEALTH_QUESTIONS, HEALTH_VERSION, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal";
+import { HEALTH_CONDITIONS, HEALTH_VERSION, PRIVACY_VERSION, TERMS_VERSION } from "@/lib/legal";
 import Button from "../ui/Button";
 import { Card } from "./primitives";
 
@@ -91,8 +91,7 @@ function TermsStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
 }
 
 function HealthStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
-  const [answers, setAnswers] = useState<Record<string, boolean>>({});
-  const [clearance, setClearance] = useState(false);
+  const [declared, setDeclared] = useState(false);
   const [risk, setRisk] = useState(false);
   const [accurate, setAccurate] = useState(false);
   const [data, setData] = useState(false);
@@ -100,10 +99,7 @@ function HealthStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const answered = HEALTH_QUESTIONS.every((q) => answers[q.id] !== undefined);
-  const anyYes = HEALTH_QUESTIONS.some((q) => answers[q.id] === true);
-  const blocked = anyYes && !clearance;
-  const ready = answered && !blocked && risk && accurate && data && name.trim().length >= 2;
+  const ready = declared && risk && accurate && data && name.trim().length >= 2;
 
   const submit = async () => {
     setBusy(true);
@@ -112,8 +108,7 @@ function HealthStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
       onDone(
         await api.declareHealth({
           version: HEALTH_VERSION,
-          answers,
-          medicalClearance: anyYes && clearance,
+          conditionsDeclaration: declared,
           riskAcknowledged: risk,
           accuracyConfirmed: accurate,
           dataConsent: data,
@@ -129,62 +124,27 @@ function HealthStep({ onDone }: { onDone: (status: ConsentStatus) => void }) {
 
   return (
     <>
-      <Card className="divide-y divide-white/[0.06]">
-        {HEALTH_QUESTIONS.map((q, i) => (
-          <fieldset key={q.id} className="flex flex-col gap-3 p-4">
-            <legend className="text-body-md leading-6">
-              <span dir="ltr" className="me-2 font-bold tabular-nums text-text-muted">
-                {i + 1}
-              </span>
-              {q.text}
-            </legend>
-            <div className="flex gap-2" role="radiogroup" aria-label={q.text}>
-              {[
-                { value: false, label: "לא" },
-                { value: true, label: "כן" },
-              ].map((option) => {
-                const selected = answers[q.id] === option.value;
-                return (
-                  <button
-                    key={option.label}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: option.value }))}
-                    className={`h-11 min-w-20 rounded-xl px-5 font-heading text-body-md font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember ${
-                      selected ? (option.value ? "bg-ember text-canvas" : "bg-volt text-canvas") : "bg-white/[0.07] text-text-primary"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-          </fieldset>
-        ))}
+      <Card className="flex flex-col gap-3 p-4">
+        <p className="font-heading text-body-lg font-bold">מצבים שמחייבים אישור רופא לפני אימון</p>
+        <ul className="list-disc space-y-2 ps-5 text-body-md leading-6 text-text-secondary">
+          {HEALTH_CONDITIONS.map((condition) => (
+            <li key={condition}>{condition}</li>
+          ))}
+        </ul>
       </Card>
 
-      {anyYes && (
-        <Card className="flex flex-col gap-2 border-s-4 border-ember p-4">
-          <p className="font-heading text-body-lg font-bold text-ember">יש תשובה ״כן״</p>
-          <p className="text-body-md leading-6 text-text-secondary">
-            לפני שמתחילים להתאמן יש להתייעץ עם רופא ולקבל את אישורו. אם עוד לא עשיתם זאת, אפשר לחזור להצהרה אחרי שתקבלו אישור.
-          </p>
-          <Check checked={clearance} onChange={setClearance}>
-            התייעצתי עם רופא, וקיבלתי את אישורו להתאמן.
-          </Check>
-        </Card>
-      )}
-
       <div className="flex flex-col">
+        <Check checked={declared} onChange={setDeclared}>
+          אני מצהיר/ה שאף אחד מהמצבים שברשימה אינו חל עליי, או שאחד מהם חל עליי והתייעצתי עם רופא וקיבלתי את אישורו להתאמן.
+        </Check>
         <Check checked={risk} onChange={setRisk}>
           אני מבין/ה שפעילות גופנית כרוכה בסיכון לפציעה, ושאני מתאמן/ת על אחריותי, בכפוף לתנאי השימוש.
         </Check>
         <Check checked={accurate} onChange={setAccurate}>
-          הפרטים שמסרתי נכונים ומלאים. אעדכן את ההצהרה ואפנה לרופא אם מצבי הבריאותי ישתנה.
+          ההצהרה נכונה ומלאה. אעדכן אותה ואפנה לרופא אם מצבי הבריאותי ישתנה.
         </Check>
         <Check checked={data} onChange={setData}>
-          אני נותן/ת הסכמה מפורשת לאיסוף ולשמירת המידע הבריאותי שמסרתי, כמפורט במדיניות הפרטיות.
+          אני נותן/ת הסכמה מפורשת לשמירת ההצהרה הזו, כמפורט במדיניות הפרטיות.
         </Check>
       </div>
 
@@ -240,7 +200,7 @@ export default function ConsentFlow({
       )}
     </Shell>
   ) : (
-    <Shell title="הצהרת בריאות" lead="עונים בכנות על כמה שאלות קצרות. המידע נשמר אצלנו בלבד, כמפורט במדיניות הפרטיות." onClose={onClose}>
+    <Shell title="הצהרת בריאות" lead="קוראים את הרשימה, ומאשרים. ההצהרה נשמרת אצלנו בלבד, כמפורט במדיניות הפרטיות." onClose={onClose}>
       <HealthStep onDone={update} />
       {onLogout && (
         <Button variant="ghost" onClick={onLogout}>

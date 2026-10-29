@@ -3,19 +3,21 @@
 // (fitfam-api LegalVersions.java); the API asks every customer to accept again.
 export const TERMS_VERSION = "2026-10-29";
 export const PRIVACY_VERSION = "2026-10-29";
-export const HEALTH_VERSION = "2026-10-29";
+export const HEALTH_VERSION = "2026-10-30";
 
-/** Ids must match LegalVersions.HEALTH_QUESTION_IDS in the API. Plain yes/no questions, modelled on the common PAR-Q form. */
-export const HEALTH_QUESTIONS: { id: string; text: string }[] = [
-  { id: "q1", text: "האם רופא אמר לך אי פעם שיש לך בעיית לב, או שמותר לך לעסוק בפעילות גופנית רק בהמלצת רופא?" },
-  { id: "q2", text: "האם את/ה חש/ה כאב בחזה בזמן פעילות גופנית?" },
-  { id: "q3", text: "האם בחודש האחרון חשת כאב בחזה גם בזמן מנוחה?" },
-  { id: "q4", text: "האם את/ה מאבד/ת שיווי משקל בגלל סחרחורת, או איבדת הכרה אי פעם?" },
-  { id: "q5", text: "האם יש לך בעיה בעצמות, במפרקים, בגידים או בגב שעלולה להחמיר בעקבות פעילות גופנית, או שעברת פציעה או ניתוח בשנה האחרונה?" },
-  { id: "q6", text: "האם את/ה נוטל/ת כיום תרופות ללחץ דם או למחלת לב?" },
-  { id: "q7", text: "האם יש לך לחץ דם גבוה, סוכרת, אסתמה, אפילפסיה או מחלה כרונית אחרת שאינן מאוזנות?" },
-  { id: "q8", text: "האם את/ה בהריון, או ילדת בששת החודשים האחרונים?" },
-  { id: "q9", text: "האם קיימת סיבה רפואית אחרת שבגללה לא כדאי לך להתאמן?" },
+/**
+ * The conditions the health declaration lists (modelled on the common PAR-Q form). The customer reads them and ticks one
+ * declaration; no per-condition answer is stored. Changing this list or the declaration wording means bumping HEALTH_VERSION.
+ */
+export const HEALTH_CONDITIONS: string[] = [
+  "בעיית לב, או הוראת רופא שמותר לי לעסוק בפעילות גופנית רק בהמלצתו.",
+  "כאב בחזה בזמן פעילות גופנית, או כאב בחזה גם במנוחה בחודש האחרון.",
+  "איבוד שיווי משקל בגלל סחרחורת, או איבוד הכרה.",
+  "בעיה בעצמות, במפרקים, בגידים או בגב שעלולה להחמיר בעקבות פעילות גופנית, או פציעה או ניתוח בשנה האחרונה.",
+  "נטילת תרופות ללחץ דם או למחלת לב.",
+  "לחץ דם גבוה, סוכרת, אסתמה, אפילפסיה או מחלה כרונית אחרת שאינן מאוזנות.",
+  "הריון, או לידה בששת החודשים האחרונים.",
+  "כל סיבה רפואית אחרת שבגללה לא כדאי לי להתאמן.",
 ];
 
 const DEFAULT_NAME = "FitFam";

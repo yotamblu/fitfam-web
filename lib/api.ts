@@ -198,15 +198,13 @@ export type ConsentStatus = {
   termsVersion: string;
   privacyVersion: string;
   healthVersion: string;
-  questionIds: string[];
   terms: { version: string; acceptedAt: string; current: boolean } | null;
-  health: { version: string; declaredAt: string; expiresAt: string; current: boolean; medicalClearance: boolean } | null;
+  health: { version: string; declaredAt: string; expiresAt: string; current: boolean } | null;
 };
 
 export type HealthInput = {
   version: string;
-  answers: Record<string, boolean>;
-  medicalClearance: boolean;
+  conditionsDeclaration: boolean;
   riskAcknowledged: boolean;
   accuracyConfirmed: boolean;
   dataConsent: boolean;
@@ -258,10 +256,8 @@ const MESSAGES: Record<string, string> = {
   not_found: "לא מצאנו את מה שחיפשתם.",
   version_outdated: "הנוסח התעדכן. רעננו את הדף ונסו שוב.",
   adult_required: "השירות מיועד לבני 18 ומעלה.",
-  answers_incomplete: "יש לענות על כל השאלות.",
   confirmations_required: "יש לאשר את כל ההצהרות.",
   name_required: "יש להקליד שם מלא.",
-  medical_clearance_required: "כשיש תשובה ״כן״ צריך אישור רפואי לפני שמתחילים.",
   consent_required: "לפני שמתאמנים צריך לאשר את התנאים ולמלא הצהרת בריאות.",
   admin_cannot_self_delete: "אי אפשר למחוק כך חשבון של מנהל.",
   invalid_five_k: "זמן ה־5 ק״מ צריך להיות בין 12:00 ל־70:00.",

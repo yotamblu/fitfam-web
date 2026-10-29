@@ -13,7 +13,6 @@ export default async function ConsentPreviewPage({ searchParams }: { searchParam
     termsVersion: TERMS_VERSION,
     privacyVersion: PRIVACY_VERSION,
     healthVersion: HEALTH_VERSION,
-    questionIds: [],
     terms: step === "health" ? { version: "x", acceptedAt: "", current: true } : null,
     health: null,
   };
