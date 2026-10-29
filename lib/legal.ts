@@ -18,17 +18,19 @@ export const HEALTH_QUESTIONS: { id: string; text: string }[] = [
   { id: "q9", text: "האם קיימת סיבה רפואית אחרת שבגללה לא כדאי לך להתאמן?" },
 ];
 
-const TO_COMPLETE = "[יושלם לפני ההשקה]";
+const DEFAULT_NAME = "FitFam";
+const DEFAULT_EMAIL = "fitfamhybridapp@gmail.com";
 
 /**
- * Who runs the service, for the terms and the privacy policy. Server-side environment variables (set in Vercel and
- * in .env.local), so no personal details sit in the public repository.
+ * Who runs the service, for the terms and the privacy policy. For now just the brand and a contact email (both public by
+ * design). The real name and business number can be added later with the server-side environment variables
+ * LEGAL_OPERATOR_NAME and LEGAL_OPERATOR_ID (and LEGAL_CONTACT_EMAIL, LEGAL_ADDRESS); nothing personal sits in the repository.
  */
 export function operatorDetails() {
   return {
-    name: process.env.LEGAL_OPERATOR_NAME?.trim() || TO_COMPLETE,
-    taxId: process.env.LEGAL_OPERATOR_ID?.trim() || TO_COMPLETE,
-    email: process.env.LEGAL_CONTACT_EMAIL?.trim() || TO_COMPLETE,
+    name: process.env.LEGAL_OPERATOR_NAME?.trim() || DEFAULT_NAME,
+    taxId: process.env.LEGAL_OPERATOR_ID?.trim() || null,
+    email: process.env.LEGAL_CONTACT_EMAIL?.trim() || DEFAULT_EMAIL,
     address: process.env.LEGAL_ADDRESS?.trim() || null,
   };
 }

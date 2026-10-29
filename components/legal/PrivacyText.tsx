@@ -8,7 +8,8 @@ export default function PrivacyText() {
     <>
       <LegalSection title="1. מי אחראי על המידע">
         <p>
-          הגורם האחראי על המידע הוא {op.name}, עוסק פטור, מספר עוסק {op.taxId} (&quot;המפעיל&quot;). ליצירת קשר בנושאי פרטיות: {op.email}
+          הגורם האחראי על המידע הוא {op.name}
+          {op.taxId ? `, עוסק פטור, מספר עוסק ${op.taxId}` : ""} (&quot;המפעיל&quot;). ליצירת קשר בנושאי פרטיות: {op.email}
           {op.address ? `, ${op.address}` : ""}.
         </p>
       </LegalSection>

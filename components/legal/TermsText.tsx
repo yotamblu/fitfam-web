@@ -9,7 +9,8 @@ export default function TermsText() {
     <>
       <LegalSection title="1. מי אנחנו ועל מה ההסכם">
         <p>
-          FitFam (&quot;השירות&quot;) מופעל על ידי {op.name}, עוסק פטור, מספר עוסק {op.taxId} (&quot;המפעיל&quot;, &quot;אנחנו&quot;). ליצירת קשר: {op.email}
+          FitFam (&quot;השירות&quot;) מופעל על ידי {op.name}
+          {op.taxId ? `, עוסק פטור, מספר עוסק ${op.taxId}` : ""} (&quot;המפעיל&quot;, &quot;אנחנו&quot;). ליצירת קשר: {op.email}
           {op.address ? `, ${op.address}` : ""}.
         </p>
         <p>
