@@ -9,6 +9,7 @@ import { FINISH_FLAG, SPORT_LABELS, buildPreview, nextUp } from "@/lib/training"
 import Button, { buttonClasses } from "../ui/Button";
 import Celebration, { type Reward } from "./Celebration";
 import ExerciseSheet from "./ExerciseSheet";
+import FitbotAfterLink from "./FitbotAfterLink";
 import { CheckIcon, ChevronLeftIcon, PlayIcon } from "./icons";
 import { Card, Meta, RowList } from "./primitives";
 import { themeForWorkout, type Theme } from "./RoadmapScenery";
@@ -101,7 +102,7 @@ export default function WorkoutScreen() {
   const workout = data?.workout ?? null;
   const theme = useMemo(() => (workout ? themeForWorkout(workout) : null), [workout]);
 
-  if (outcome) return <OutcomeView outcome={outcome} theme={theme} onBack={() => router.replace("/home")} />;
+  if (outcome) return <OutcomeView workoutId={id} outcome={outcome} theme={theme} onBack={() => router.replace("/home")} />;
 
   const isChallenge = workout?.type === "challenge";
   const isCheckpoint = workout?.type === "checkpoint";
@@ -204,6 +205,7 @@ export default function WorkoutScreen() {
                   <PlayIcon className="size-4" />
                   לעשות שוב בליווי
                 </Link>
+                <FitbotAfterLink workoutId={id} />
               </>
             ) : (
               <>
@@ -291,7 +293,7 @@ function WorkoutSkeleton() {
 }
 
 /** After a challenge that did not pass: a soft sound and an open door, nothing punishing. */
-function NotYet() {
+function NotYet({ workoutId }: { workoutId: string }) {
   useEffect(() => {
     sfx.notYet();
   }, []);
@@ -299,19 +301,21 @@ function NotYet() {
     <section className="mx-auto flex w-full max-w-md flex-col items-center gap-5 pt-10 text-center lg:pt-16">
       <h2 className="ff-rise-in font-heading text-[30px] font-bold leading-10">עוד לא עברתם</h2>
       <p className="ff-rise-in text-body-lg text-text-secondary [animation-delay:100ms]">אפשר לנסות שוב מתי שרוצים. אין הגבלה.</p>
-      <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true, variant: "secondary" })} ff-rise-in [animation-delay:200ms]`}>
+      <FitbotAfterLink workoutId={workoutId} className="ff-rise-in w-full [animation-delay:160ms]" />
+      <Link href="/roadmap" className={`${buttonClasses({ size: "lg", fullWidth: true, variant: "secondary" })} ff-rise-in [animation-delay:220ms]`}>
         חזרה למסלול
       </Link>
     </section>
   );
 }
 
-export function OutcomeView({ outcome, theme = null, onBack }: { outcome: Outcome; theme?: Theme | null; onBack: () => void }) {
+export function OutcomeView({ workoutId, outcome, theme = null, onBack }: { workoutId: string; outcome: Outcome; theme?: Theme | null; onBack: () => void }) {
   if (outcome.kind === "completed") {
     const next = nextUp(outcome.roadmap);
     return (
       <StackShell title="האימון הושלם" backHref="/home" backLabel="לבית" theme={theme}>
         <Celebration title="האימון הושלם" reward={outcome.reward}>
+          <FitbotAfterLink workoutId={workoutId} />
           {next ? (
             <>
               <p className="text-body-md text-text-secondary">
@@ -342,12 +346,13 @@ export function OutcomeView({ outcome, theme = null, onBack }: { outcome: Outcom
           subtitle={result.planCompleted ? undefined : `עכשיו אתם ברמה ${result.currentLevelNumber}`}
           reward={reward}
         >
+          <FitbotAfterLink workoutId={workoutId} />
           <Link href="/roadmap" className={buttonClasses({ size: "lg", fullWidth: true })}>
             למסלול
           </Link>
         </Celebration>
       ) : (
-        <NotYet />
+        <NotYet workoutId={workoutId} />
       )}
     </StackShell>
   );

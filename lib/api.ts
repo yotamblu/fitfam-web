@@ -262,6 +262,7 @@ export const api = {
   chat: (id: string) => request<FitbotChat>(`/me/chats/${id}`),
   sendChat: (id: string, message: string) =>
     request<FitbotSendResult>(`/me/chats/${id}/messages`, { method: "POST", body: JSON.stringify({ message }) }),
+  chatAfterWorkout: (workoutId: string) => request<FitbotChat>(`/me/chats/after-workout/${workoutId}`, { method: "POST" }),
   titleChat: (id: string) => request<FitbotChatSummary>(`/me/chats/${id}/title`, { method: "POST" }),
   renameChat: (id: string, title: string) =>
     request<FitbotChatSummary>(`/me/chats/${id}`, { method: "PUT", body: JSON.stringify({ title }) }),
@@ -291,6 +292,7 @@ const MESSAGES: Record<string, string> = {
   fitbot_unavailable: "Fitbot לא זמין כרגע.",
   fitbot_failed: "Fitbot לא הצליח לענות. נסו שוב.",
   fitbot_empty: "Fitbot לא הצליח לענות. נסו לנסח אחרת.",
+  workout_not_completed: "אפשר לדבר עם Fitbot על אימון רק אחרי שמסיימים אותו.",
   ai_consent_required: "צריך לאשר את השימוש ב-Fitbot לפני שמתחילים.",
 };
 
