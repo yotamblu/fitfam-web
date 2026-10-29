@@ -9,7 +9,7 @@ import ChatPane, { NewChat, PENDING_KEY } from "./FitbotChat";
 import FitbotConsent from "./FitbotConsent";
 import FitbotList from "./FitbotList";
 import { PlusIcon } from "./icons";
-import { Card } from "./primitives";
+import { Card, SectionTitle } from "./primitives";
 import { useSession } from "./Session";
 
 /**
@@ -50,22 +50,20 @@ export default function FitbotScreen() {
   };
 
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[18rem_1fr] lg:items-start lg:gap-6">
-      <aside className={`${id ? "hidden lg:flex" : "order-2 flex lg:order-none"} flex-col gap-3 lg:sticky lg:top-10`}>
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-heading text-body-lg font-bold">השיחות שלי</h2>
-          <Link href="/fitbot" className={`${buttonClasses({ variant: "secondary", size: "sm" })} hidden lg:inline-flex`}>
-            <PlusIcon className="size-4" />
-            שיחה חדשה
-          </Link>
-        </div>
+    <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start lg:gap-10">
+      <section className="flex min-w-0 flex-col">
+        {id ? <ChatPane key={id} id={id} /> : <NewChat onStart={(text) => void start(text)} busy={starting} error={error} />}
+      </section>
+
+      <aside className={`${id ? "hidden lg:flex" : "flex"} ff-rise-in flex-col gap-3 [animation-delay:180ms] lg:sticky lg:top-10`}>
+        <SectionTitle aside={fitbot.chats.length > 0 ? `${fitbot.chats.length}` : undefined}>השיחות שלי</SectionTitle>
+        <Link href="/fitbot" className={`${buttonClasses({ variant: id ? "primary" : "secondary" })} hidden lg:inline-flex`}>
+          <PlusIcon className="size-4" />
+          שיחה חדשה
+        </Link>
         <FitbotList activeId={id} />
         <p className="px-1 text-label-md text-text-muted">שיחות שלא היו בהן פעילות {fitbot.retentionDays} ימים נמחקות אוטומטית.</p>
       </aside>
-
-      <section className={id ? "flex flex-col" : "order-1 flex flex-col lg:order-none"}>
-        {id ? <ChatPane key={id} id={id} /> : <NewChat onStart={(text) => void start(text)} busy={starting} error={error} />}
-      </section>
     </div>
   );
 }

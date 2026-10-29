@@ -1,12 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { api, describeError } from "@/lib/api";
-import Button from "../ui/Button";
-import { SparkIcon } from "./icons";
-import { Card } from "./primitives";
+import { buttonClasses } from "../ui/Button";
+import { FitbotMark } from "./FitbotChat";
+import { ChatIcon, ClockIcon, InfoIcon, LockIcon } from "./icons";
+import { Card, RowList } from "./primitives";
 import { useSession } from "./Session";
+
+function Fact({ Icon, title, children }: { Icon: ComponentType<{ className?: string }>; title: string; children: React.ReactNode }) {
+  return (
+    <li className="flex items-start gap-3 px-4 py-4">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/[0.07] text-text-secondary">
+        <Icon className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="font-heading text-body-lg font-bold">{title}</p>
+        <p className="mt-0.5 text-body-md text-text-secondary">{children}</p>
+      </div>
+    </li>
+  );
+}
 
 /** The one-time notice before the first conversation: what Fitbot is, where the messages go, how long they stay. */
 export default function FitbotConsent() {
@@ -28,42 +43,50 @@ export default function FitbotConsent() {
   };
 
   return (
-    <Card className="mx-auto flex w-full max-w-xl flex-col gap-4 p-5 lg:my-auto">
-      <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-full bg-ember/15 text-ember">
-          <SparkIcon className="size-6" />
-        </span>
-        <h1 className="font-heading text-headline-sm font-bold">לפני שמתחילים עם Fitbot</h1>
-      </div>
+    <div className="flex w-full flex-col gap-6 lg:max-w-xl">
+      <header className="ff-rise-in flex items-center gap-4">
+        <FitbotMark size={64} value={1} />
+        <div>
+          <p className="text-body-md text-text-secondary">לפני הפעם הראשונה</p>
+          <h1 className="mt-0.5 font-heading text-headline-md font-bold lg:text-[32px] lg:leading-10">Fitbot</h1>
+        </div>
+      </header>
 
-      <ul className="flex list-disc flex-col gap-2 ps-5 text-body-md text-text-secondary marker:text-ember">
-        <li>Fitbot הוא בינה מלאכותית. הוא יכול לטעות, והוא לא תחליף לרופא, לפיזיותרפיסט או למאמן.</li>
-        <li>ההודעות שלכם נשלחות לעיבוד אצל Google (Gemini) כדי לענות. אל תכתבו פרטים מזהים או מידע רפואי שאין בו צורך.</li>
-        <li>
-          שיחות נשמרות אצלנו עד {fitbot?.retentionDays ?? 100} ימים בלי פעילות, ואז נמחקות. אפשר למחוק שיחה בכל רגע.
-        </li>
-        <li>אפשר לשלוח עד {fitbot?.dailyLimit ?? 30} הודעות ביום.</li>
-      </ul>
+      <RowList className="ff-rise-in divide-y [animation-delay:80ms]">
+        <Fact Icon={InfoIcon} title="בינה מלאכותית">
+          Fitbot יכול לטעות, והוא לא תחליף לרופא, לפיזיותרפיסט או למאמן.
+        </Fact>
+        <Fact Icon={LockIcon} title="הפרטיות שלכם">
+          ההודעות נשלחות לעיבוד אצל Google (Gemini). אל תכתבו פרטים מזהים או מידע רפואי שאין בו צורך.
+        </Fact>
+        <Fact Icon={ClockIcon} title="כמה זמן נשמר">
+          שיחות שלא היו בהן פעילות {fitbot?.retentionDays ?? 100} ימים נמחקות. אפשר למחוק שיחה בכל רגע.
+        </Fact>
+        <Fact Icon={ChatIcon} title="מגבלה יומית">
+          עד <span dir="ltr">{fitbot?.dailyLimit ?? 30}</span> הודעות ביום.
+        </Fact>
+      </RowList>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-white/[0.04] p-3 text-body-md">
-        <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-1 size-5 shrink-0 accent-[var(--color-ember)]" />
-        <span>
-          הבנתי, ואני מסכים/ה ששיחותיי עם Fitbot יעובדו על ידי ספק בינה מלאכותית כמתואר{" "}
-          <Link href="/privacy" target="_blank" className="text-ember underline">
-            במדיניות הפרטיות
-          </Link>
-          .
-        </span>
-      </label>
-
-      {error && (
-        <p role="alert" className="text-body-md text-ember">
-          {error}
-        </p>
-      )}
-      <Button size="lg" fullWidth disabled={!agree || busy} onClick={() => void accept()}>
-        {busy ? "רגע..." : "אישור והתחלה"}
-      </Button>
-    </Card>
+      <Card className="ff-rise-in flex flex-col gap-4 p-4 [animation-delay:140ms]">
+        <label className="flex cursor-pointer items-start gap-3 text-body-md">
+          <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--color-ember)]" />
+          <span>
+            הבנתי, ואני מסכים/ה ששיחותיי עם Fitbot יעובדו על ידי ספק בינה מלאכותית כמתואר{" "}
+            <Link href="/privacy" target="_blank" className="text-ember underline">
+              במדיניות הפרטיות
+            </Link>
+            .
+          </span>
+        </label>
+        {error && (
+          <p role="alert" className="text-body-md text-ember">
+            {error}
+          </p>
+        )}
+        <button type="button" disabled={!agree || busy} onClick={() => void accept()} className={buttonClasses({ size: "lg", fullWidth: true })}>
+          {busy ? "רגע..." : "אישור והתחלה"}
+        </button>
+      </Card>
+    </div>
   );
 }

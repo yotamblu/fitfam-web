@@ -140,3 +140,14 @@ export const PencilIcon = ({ className }: IconProps) => (
     <path d="m4 20 1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L8 19z" />
   </svg>
 );
+export const ClockIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+export const ChatIcon = ({ className }: IconProps) => (
+  <svg {...base} className={className}>
+    <path d="M4 5h16v11H9l-5 4z" />
+  </svg>
+);
