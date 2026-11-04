@@ -174,6 +174,11 @@ export type CustomerExercise = {
 
 export type StepsResponse = { workoutId: string; resumeStep: number; steps: Step[] };
 
+/** One set the customer wrote down; either value may be missing. */
+export type LogSet = { exerciseId: string; setNumber: number; weightKg: number | null; reps: number | null };
+export type PreviousLog = { exerciseId: string; workoutTitleHe: string | null; loggedAt: string; sets: LogSet[] };
+export type WorkoutLog = { workoutId: string; editable: boolean; sets: LogSet[]; previous: PreviousLog[] };
+
 export type AttemptResult = { passed: boolean; currentLevelNumber: number; levelChanged: boolean; planCompleted: boolean };
 
 export type Stats = {
@@ -238,6 +243,8 @@ export const api = {
   workout: (id: string) => request<CustomerWorkout>(`/workouts/${id}`),
   steps: (id: string) => request<StepsResponse>(`/workouts/${id}/steps`),
   exercise: (id: string) => request<CustomerExercise>(`/exercises/${id}`),
+  workoutLog: (id: string) => request<WorkoutLog>(`/workouts/${id}/log`),
+  saveSet: (id: string, set: LogSet) => request<void>(`/workouts/${id}/log`, { method: "PUT", body: JSON.stringify(set) }),
   saveProgress: (id: string, resumeStep: number) =>
     request<void>(`/workouts/${id}/progress`, { method: "PUT", body: JSON.stringify({ resumeStep }) }),
   complete: (id: string) => request<Roadmap>(`/workouts/${id}/complete`, { method: "POST" }),

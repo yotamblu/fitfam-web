@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, describeError, type CustomerWorkout, type Step } from "@/lib/api";
 import { haptic, sfx } from "@/lib/sfx";
-import { BLOCK_LABELS, FINISH_FLAG, ZONE_HINT, clock, formatSeconds, targetDetails, targetHeadline, targetParts } from "@/lib/training";
+import { BLOCK_LABELS, FINISH_FLAG, ZONE_HINT, clock, formatSeconds, loggable, targetDetails, targetHeadline, targetParts } from "@/lib/training";
 import { paceRange, repRange } from "@/lib/pace";
 import Button from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
@@ -18,6 +18,7 @@ import { useVenueTint } from "./StackShell";
 import VenueBackdrop from "./VenueBackdrop";
 import { ProgressRing, Skeleton } from "./ui";
 import Video from "./Video";
+import { LogHelp, SetRow, useWorkoutLog } from "./WorkoutLog";
 
 /**
  * The optional guided mode: one step at a time, huge numerals you can read from a metre away, rest timers that start by
@@ -39,6 +40,7 @@ export default function PlayerScreen() {
   const endAt = useRef<number | null>(null);
   const doneRef = useRef(false); // a finished workout can be played again for practice: nothing to save, nothing to earn
   const lastBeep = useRef<number | null>(null);
+  const workoutLog = useWorkoutLog(id);
 
   /** Moves to a step and sets up its timer: rests start by themselves, timed work waits for a tap. */
   const goTo = useCallback(
@@ -340,6 +342,13 @@ export default function PlayerScreen() {
                   {target.notesHe && <p>{target.notesHe}</p>}
                   {step.blockNotes && <p>{step.blockNotes}</p>}
                   {target.exercise?.cuesHe && <p className="rounded-xl bg-surface-raised p-3.5">{target.exercise.cuesHe}</p>}
+                </div>
+              )}
+              {loggable(step) && workoutLog.editable && (
+                <div className="flex flex-col gap-2 rounded-2xl bg-surface-raised p-4">
+                  <p className="text-label-md font-semibold text-text-secondary">לרשום (לא חובה)</p>
+                  <SetRow key={`${target.exercise!.id}-${step.setNumber}`} api={workoutLog} exerciseId={target.exercise!.id} setNumber={step.setNumber!} label={`סט ${step.setNumber}`} />
+                  <LogHelp />
                 </div>
               )}
               {target.exercise?.youtubeId && <Video youtubeId={target.exercise.youtubeId} title={target.exercise.nameHe} />}

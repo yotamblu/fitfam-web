@@ -16,6 +16,7 @@ import { themeForWorkout, type Theme } from "./RoadmapScenery";
 import { useSession } from "./Session";
 import StackShell from "./StackShell";
 import { Skeleton } from "./ui";
+import { ExerciseLog, useWorkoutLog } from "./WorkoutLog";
 import Video from "./Video";
 
 type Outcome = { kind: "completed"; roadmap: Roadmap; reward: Reward } | { kind: "challenge"; result: AttemptResult; reward: Reward };
@@ -36,6 +37,7 @@ export default function WorkoutScreen() {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [exerciseId, setExerciseId] = useState<string | null>(null);
   const closeExercise = useCallback(() => setExerciseId(null), []);
+  const workoutLog = useWorkoutLog(id);
 
   /** Works out what the action earned: the points gained, and whether the account levelled up. */
   const rewardAfter = async (): Promise<Reward> => {
@@ -127,7 +129,7 @@ export default function WorkoutScreen() {
             <section className="ff-rise-in">
               <Meta items={[isChallenge ? "אתגר מעבר רמה" : isCheckpoint ? "נקודת ביקורת" : SPORT_LABELS[workout.sport], workout.estMinutes !== null && `${workout.estMinutes} דק׳`, done && "הושלם"]} />
               <h2 className="mt-2 font-heading text-[30px] font-bold leading-10 [text-shadow:0_2px_16px_rgba(0,0,0,0.55)] lg:text-[40px] lg:leading-[48px]">{workout.titleHe ?? "אימון"}</h2>
-              {workout.descriptionHe && <p className="mt-2 text-body-lg text-text-secondary">{workout.descriptionHe}</p>}
+              {workout.descriptionHe && <p className="mt-2 whitespace-pre-line text-body-lg text-text-secondary">{workout.descriptionHe}</p>}
             </section>
 
             {(isChallenge || isCheckpoint) && workout.goalHe && (
@@ -183,6 +185,7 @@ export default function WorkoutScreen() {
                             )}
                           </div>
                         )}
+                        {row.log && <ExerciseLog api={workoutLog} exerciseId={row.log.exerciseId} sets={row.log.sets} />}
                         {row.youtubeId && (
                           <div className="px-4 pb-3.5">
                             <Video youtubeId={row.youtubeId} title={row.name} />

@@ -102,10 +102,16 @@ export const MEASURE_LABELS: Record<string, string> = {
 
 // ---- the read-only workout preview, built from the same steps the player uses ----
 
-export type PreviewRow = { key: string; name: string; summary: string; extra: string[]; youtubeId: string | null; exercises: { id: string; name: string }[] };
+export type PreviewRow = { key: string; name: string; summary: string; extra: string[]; youtubeId: string | null; exercises: { id: string; name: string }[]; log: { exerciseId: string; sets: number } | null };
 export type PreviewSection = { title: string | null; rows: PreviewRow[] };
 
 /** Groups the steps by section and folds the sets of one exercise into one row ("3 סטים · 10 חזרות · מנוחה 60 שניות"). */
+/** Weight and reps can be written down for a set of a bank exercise measured in reps, in a plain straight block. */
+export function loggable(step: Step): boolean {
+  const exercise = step.target?.exercise;
+  return step.type === "work" && step.blockStyle === "straight" && step.setNumber !== null && !!exercise && exercise.measure === "reps" && !exercise.id.startsWith("builtin:");
+}
+
 export function buildPreview(steps: Step[]): PreviewSection[] {
   const sections: PreviewSection[] = [];
   let lastKey = "";
@@ -128,6 +134,7 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
         extra: [],
         youtubeId: null,
         exercises: realExercises(step.targets ?? []),
+        log: null,
       });
       lastKey = "";
       return;
@@ -168,6 +175,7 @@ export function buildPreview(steps: Step[]): PreviewSection[] {
       extra,
       youtubeId: target.exercise?.youtubeId ?? null,
       exercises: realExercises([target]),
+      log: loggable(step) ? { exerciseId: target.exercise!.id, sets: step.setCount ?? 1 } : null,
     });
   });
   return sections;
