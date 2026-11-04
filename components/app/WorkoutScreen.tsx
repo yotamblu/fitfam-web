@@ -5,9 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, describeError, type AttemptResult, type CustomerWorkout, type Roadmap, type Step, type Stats } from "@/lib/api";
 import { sfx } from "@/lib/sfx";
-import { FINISH_FLAG, SPORT_LABELS, buildPreview, nextUp } from "@/lib/training";
+import { FINISH_FLAG, SPORT_LABELS, buildPreview, nextUp, splitEffort } from "@/lib/training";
 import Button, { buttonClasses } from "../ui/Button";
 import Celebration, { type Reward } from "./Celebration";
+import EffortBox from "./EffortBox";
 import ExerciseSheet from "./ExerciseSheet";
 import FitbotAfterLink from "./FitbotAfterLink";
 import { CheckIcon, ChevronLeftIcon, PlayIcon } from "./icons";
@@ -110,6 +111,7 @@ export default function WorkoutScreen() {
   const isCheckpoint = workout?.type === "checkpoint";
   const done = workout?.state === "done";
   const preview = data ? buildPreview(data.steps) : [];
+  const effortNotes = data?.steps.find((s) => splitEffort(s.blockNotes))?.blockNotes ?? null;
   const resuming = (workout?.resumeStep ?? 0) > 0;
   const points = stats ? (isChallenge ? stats.rewards.challenge : stats.rewards.workout) : null;
 
@@ -138,6 +140,8 @@ export default function WorkoutScreen() {
                 <p className="mt-1 font-heading text-headline-sm font-bold">{workout.goalHe}</p>
               </Card>
             )}
+
+            {effortNotes && <EffortBox notes={effortNotes} className="ff-rise-in [animation-delay:60ms]" />}
 
             <section className="flex flex-col gap-6" aria-label="תכנית האימון">
               {preview.map((section, si) => (

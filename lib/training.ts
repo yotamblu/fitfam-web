@@ -112,6 +112,17 @@ export function loggable(step: Step): boolean {
   return step.type === "work" && step.blockStyle === "straight" && step.setNumber !== null && !!exercise && exercise.measure === "reps" && !exercise.id.startsWith("builtin:");
 }
 
+const EFFORT_PREFIX = "יעד המאמץ:";
+
+/** A block note that starts with the effort target is split into the target and its explanation. */
+export function splitEffort(notes: string | null | undefined): { goal: string; explanation: string } | null {
+  if (!notes || !notes.startsWith(EFFORT_PREFIX)) return null;
+  const rest = notes.slice(EFFORT_PREFIX.length).trim();
+  const end = rest.indexOf(". ");
+  const goal = (end === -1 ? rest : rest.slice(0, end)).replace(/\.$/, "").trim();
+  return goal ? { goal, explanation: end === -1 ? "" : rest.slice(end + 2).trim() } : null;
+}
+
 export function buildPreview(steps: Step[]): PreviewSection[] {
   const sections: PreviewSection[] = [];
   let lastKey = "";

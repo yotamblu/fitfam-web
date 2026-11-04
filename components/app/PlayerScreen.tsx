@@ -9,6 +9,7 @@ import { BLOCK_LABELS, FINISH_FLAG, ZONE_HINT, clock, formatSeconds, loggable, t
 import { paceRange, repRange } from "@/lib/pace";
 import Button from "../ui/Button";
 import ProgressBar from "../ui/ProgressBar";
+import EffortBox from "./EffortBox";
 import ExerciseSheet from "./ExerciseSheet";
 import { CloseIcon, InfoIcon } from "./icons";
 import { Meta } from "./primitives";
@@ -251,7 +252,7 @@ export default function PlayerScreen() {
                 <span dir="ltr">+15</span>
               </Button>
             </div>
-            {step.blockNotes && <p className="max-w-sm text-body-md text-text-secondary">{step.blockNotes}</p>}
+            {step.blockNotes && <EffortBox notes={step.blockNotes} centered className="w-full max-w-sm" />}
             {nextStep?.target && (
               <p className="text-body-md text-text-secondary">
                 הבא: <span className="font-semibold text-text-primary">{nextStep.target.exercise?.nameHe ?? "תרגיל"}</span>
@@ -289,7 +290,7 @@ export default function PlayerScreen() {
                 </li>
               ))}
             </ul>
-            {step.blockNotes && <p className="text-body-md text-text-secondary">{step.blockNotes}</p>}
+            {step.blockNotes && <EffortBox notes={step.blockNotes} />}
           </div>
         ) : (
           target &&
@@ -337,10 +338,11 @@ export default function PlayerScreen() {
                 </div>
               )}
 
-              {(target.notesHe || step.blockNotes || target.exercise?.cuesHe) && (
+              {step.blockNotes && <EffortBox notes={step.blockNotes} />}
+
+              {(target.notesHe || target.exercise?.cuesHe) && (
                 <div className="flex flex-col gap-2 text-body-md text-text-secondary">
                   {target.notesHe && <p>{target.notesHe}</p>}
-                  {step.blockNotes && <p>{step.blockNotes}</p>}
                   {target.exercise?.cuesHe && <p className="rounded-xl bg-surface-raised p-3.5">{target.exercise.cuesHe}</p>}
                 </div>
               )}
