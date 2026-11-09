@@ -77,3 +77,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## First-run tour and Fitbot branding
+- `components/app/Tour.tsx` (mounted by `TabShell` while `useSession().tourOpen`) + the step list `lib/tour.ts` (fixed Hebrew texts spoken by Fitbot, no AI call; steps about the Fitbot tab and running paces are left out when the customer has none). Targets are elements with a `data-tour` attribute (`home-stats`, `pace`, `tab/<route>` on both tab bars); a step without a target is a centred card. The tour opens the tab of each step itself, re-measures the target every 250 ms (scroll, resize, late content), is skippable at any moment (button, Escape) and stores completion through `api.completeOnboarding` (the API field `onboarded_at`); Profile > Settings has a replay button (`startTour`). The overlay sits at z-50, under the splash (z-60).
+- Fitbot's face is `public/fitbot.png` (`components/app/FitbotLogo.tsx`: `FitbotLogo`, `FitbotTabIcon`); use it for everything Fitbot (tab icon, `FitbotMark`, chat avatars, tour). The admin app has its own copy for its Fitbot page.

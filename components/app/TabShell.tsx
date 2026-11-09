@@ -6,9 +6,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { ratio, rankTitle } from "@/lib/gamify";
 import { ChromeContext, DEFAULT_TINT, type Tint } from "./Chrome";
+import { FitbotTabIcon } from "./FitbotLogo";
 import GlassTabBar from "./GlassTabBar";
-import { BoltIcon, FlameIcon, HomeIcon, LogoutIcon, RoadIcon, SparkIcon, UserIcon } from "./icons";
+import { BoltIcon, FlameIcon, HomeIcon, LogoutIcon, RoadIcon, UserIcon } from "./icons";
 import { useSession } from "./Session";
+import Tour from "./Tour";
 import RoadmapHud from "./RoadmapHud";
 import { ProgressRing } from "./ui";
 
@@ -17,7 +19,7 @@ const BASE_TABS = [
   { href: "/roadmap", label: "מסלול", Icon: RoadIcon },
   { href: "/profile", label: "פרופיל", Icon: UserIcon },
 ];
-const FITBOT_TAB = { href: "/fitbot", label: "Fitbot", Icon: SparkIcon };
+const FITBOT_TAB = { href: "/fitbot", label: "Fitbot", Icon: FitbotTabIcon };
 
 function Avatar({ name, url, size }: { name: string; url: string | null; size: number }) {
   return (
@@ -45,7 +47,7 @@ function Avatar({ name, url, size }: { name: string; url: string | null; size: n
  */
 export default function TabShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { user, stats, logout, fitbot } = useSession();
+  const { user, stats, logout, fitbot, tourOpen } = useSession();
   const onRoadmap = pathname.startsWith("/roadmap");
   // Fitbot sits between the roadmap and the profile, only for customers it is open to
   const TABS = fitbot?.available ? [BASE_TABS[0], BASE_TABS[1], FITBOT_TAB, BASE_TABS[2]] : BASE_TABS;
@@ -113,6 +115,7 @@ export default function TabShell({ children }: { children: ReactNode }) {
                   <li key={href} className="ff-slide-in" style={{ animationDelay: `${i * 70}ms` }}>
                     <Link
                       href={href}
+                      data-tour={`tab${href}`}
                       aria-current={active ? "page" : undefined}
                       className={`flex h-12 items-center gap-3 rounded-xl px-4 font-heading text-body-lg font-bold transition ${
                         active ? "bg-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.18)]" : "text-text-secondary hover:bg-white/5 hover:text-text-primary"
@@ -179,6 +182,8 @@ export default function TabShell({ children }: { children: ReactNode }) {
 
         {/* phones and tablets: the floating liquid-glass tab bar (drag the lens between tabs) */}
         {!inChat && <GlassTabBar tabs={TABS} />}
+
+        {tourOpen && <Tour />}
       </div>
     </ChromeContext.Provider>
   );

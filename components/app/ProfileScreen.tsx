@@ -14,7 +14,7 @@ import { CountUp, Reveal, Skeleton } from "./ui";
 
 /** Account: who you are, how far you have come, your plans, and logout. (Account deletion needs its API endpoint first.) */
 export default function ProfileScreen() {
-  const { user, plans, stats, logout } = useSession();
+  const { user, plans, stats, logout, startTour } = useSession();
   const name = user.displayName ?? user.email;
 
   return (
@@ -105,6 +105,12 @@ export default function ProfileScreen() {
               </div>
               <SoundModeToggle />
               <SoundTest />
+            </Card>
+            <Card className="flex items-center justify-between gap-3 py-1 ps-4 pe-2">
+              <span className="text-body-lg">סיור היכרות עם Fitbot</span>
+              <Button variant="ghost" size="sm" onClick={startTour}>
+                להפעלה
+              </Button>
             </Card>
             <p className="text-label-md text-text-muted">אין צליל באייפון? בדקו שמתג ההשתקה שבצד המכשיר לא במצב שקט, ושעוצמת המדיה מורמת.</p>
           </div>

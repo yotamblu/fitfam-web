@@ -150,6 +150,7 @@ export default function GlassTabBar({ tabs }: { tabs: Tab[] }) {
             <Link
               key={href}
               href={href}
+              data-tour={`tab${href}`}
               aria-current={i === current ? "page" : undefined}
               onClick={(event) => {
                 if (suppressClick.current) {

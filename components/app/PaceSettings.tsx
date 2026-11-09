@@ -150,7 +150,7 @@ export default function PaceSettings() {
   };
 
   return (
-    <Card className="p-4" aria-label="קצבי ריצה">
+    <Card data-tour="pace" className="p-4" aria-label="קצבי ריצה">
       <div className="flex items-baseline justify-between gap-3">
         <h3 className="font-heading text-body-lg font-bold">קצבי ריצה</h3>
         {has && !editing && (

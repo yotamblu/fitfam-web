@@ -245,6 +245,8 @@ export const api = {
   setPaceZone: (kind: string, fastSecPerKm: number, slowSecPerKm: number) =>
     request<PaceStatus>(`/me/pace/zones/${encodeURIComponent(kind)}`, { method: "PUT", body: JSON.stringify({ fastSecPerKm, slowSecPerKm }) }),
   resetPaceZone: (kind: string) => request<PaceStatus>(`/me/pace/zones/${encodeURIComponent(kind)}`, { method: "DELETE" }),
+  onboarding: () => request<{ done: boolean }>("/me/onboarding"),
+  completeOnboarding: () => request<{ done: boolean }>("/me/onboarding/complete", { method: "POST" }),
   myPlans: () => request<MyPlan[]>("/me/plans"),
   roadmap: (slug: string) => request<Roadmap>(`/me/plans/${encodeURIComponent(slug)}/roadmap`),
   workout: (id: string) => request<CustomerWorkout>(`/workouts/${id}`),

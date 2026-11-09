@@ -28,6 +28,11 @@ type SessionValue = {
   /** Fitbot: whether it is open to this customer, the conversations and today's count; null while loading or if that call failed. */
   fitbot: FitbotOverview | null;
   setFitbot: (update: (current: FitbotOverview | null) => FitbotOverview | null) => void;
+  /** The first-run tour: open for everyone who has not finished or skipped it, and again on request (replay). */
+  tourOpen: boolean;
+  startTour: () => void;
+  /** Closes the tour (finished or skipped) and remembers it on the server the first time. */
+  endTour: () => void;
   /** The plan the roadmap tab shows; the customer's most recent choice, else the first plan. */
   activePlan: MyPlan | null;
   setActiveSlug: (slug: string) => void;
@@ -63,6 +68,9 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const [pace, setPace] = useState<PaceStatus | null>(null);
   const [consent, setConsent] = useState<ConsentStatus | null>(null);
   const [fitbot, setFitbot] = useState<FitbotOverview | null>(null);
+  // null = not known (or the call failed): no tour is forced
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+  const [replay, setReplay] = useState(false);
   const [slug, setSlug] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,8 +105,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     const giveUp = window.setTimeout(() => {
       if (!cancelled) setError("החיבור איטי מדי. בדקו את האינטרנט ונסו שוב.");
     }, 60000);
-    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null), api.consents().catch(() => null), api.fitbot().catch(() => null)])
-      .then(([me, myPlans, myStats, myPace, myConsent, myFitbot]) => {
+    Promise.all([api.me(), api.myPlans(), api.stats().catch(() => null), api.pace().catch(() => null), api.consents().catch(() => null), api.fitbot().catch(() => null), api.onboarding().catch(() => null)])
+      .then(([me, myPlans, myStats, myPace, myConsent, myFitbot, myOnboarding]) => {
         window.clearTimeout(giveUp);
         if (cancelled) return;
         setUser(me);
@@ -107,6 +115,7 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
         setPace(myPace);
         setConsent(myConsent);
         setFitbot(myFitbot);
+        setOnboarded(myOnboarding ? myOnboarding.done : null);
         setSlug(readStoredSlug());
         setError(null);
       })
@@ -165,6 +174,19 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     setPace(await api.resetPaceZone(kind));
   }, []);
 
+  const startTour = useCallback(() => setReplay(true), []);
+
+  const endTour = useCallback(() => {
+    setReplay(false);
+    if (onboarded === false) {
+      setOnboarded(true);
+      // if this fails the tour simply shows again next time
+      void api.completeOnboarding().catch(() => undefined);
+    }
+  }, [onboarded]);
+
+  const tourOpen = replay || onboarded === false;
+
   const reloadPlans = useCallback(async () => {
     try {
       setPlans(await api.myPlans());
@@ -193,8 +215,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionValue | null>(() => {
     if (!user || !plans) return null;
     const activePlan = plans.find((p) => p.planSlug === slug) ?? plans[0] ?? null;
-    return { user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, setConsent, fitbot, setFitbot, activePlan, setActiveSlug, reloadPlans, logout };
-  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, fitbot, slug, setActiveSlug, reloadPlans, logout]);
+    return { user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, setConsent, fitbot, setFitbot, tourOpen, startTour, endTour, activePlan, setActiveSlug, reloadPlans, logout };
+  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, fitbot, tourOpen, startTour, endTour, slug, setActiveSlug, reloadPlans, logout]);
 
   if (error) {
     return (

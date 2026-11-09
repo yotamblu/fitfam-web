@@ -6,7 +6,8 @@ import { api, describeError, type FitbotChat, type FitbotMessage } from "@/lib/a
 import { rankTitle } from "@/lib/gamify";
 import { sfx } from "@/lib/sfx";
 import { buttonClasses } from "../ui/Button";
-import { BoltIcon, ChevronLeftIcon, ChevronRightIcon, FlameIcon, InfoIcon, PlayIcon, RoadIcon, SendIcon, SparkIcon, TrophyIcon } from "./icons";
+import FitbotLogo from "./FitbotLogo";
+import { BoltIcon, ChevronLeftIcon, ChevronRightIcon, FlameIcon, InfoIcon, PlayIcon, RoadIcon, SendIcon, TrophyIcon } from "./icons";
 import FitbotText from "./FitbotText";
 import { timeLabel, whenLabel } from "./fitbotUtil";
 import { Card, Figure, Meta, RowList, SectionTitle } from "./primitives";
@@ -36,8 +37,8 @@ export function FitbotMark({ size = 48, value = 1 }: { size?: number; value?: nu
   const stroke = size >= 56 ? 5 : 4;
   return (
     <ProgressRing value={value} size={size} stroke={stroke}>
-      <span className="flex items-center justify-center rounded-full bg-surface-raised text-ember" style={{ width: size - stroke * 2 - 6, height: size - stroke * 2 - 6 }}>
-        <SparkIcon className="size-[52%]" />
+      <span className="flex items-center justify-center rounded-full bg-black" style={{ width: size - stroke * 2 - 6, height: size - stroke * 2 - 6 }}>
+        <FitbotLogo className="size-full" />
       </span>
     </ProgressRing>
   );
@@ -219,9 +220,7 @@ function Bubble({ message }: { message: FitbotMessage }) {
   }
   return (
     <div className="ff-rise-in flex items-start gap-3">
-      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-ember/15 text-ember">
-        <SparkIcon className="size-5" />
-      </span>
+      <FitbotLogo className="mt-0.5 size-9" />
       <div className="flex min-w-0 max-w-[92%] flex-col gap-2">
         <p className="font-heading text-label-md font-bold text-ember">Fitbot</p>
         <div className="rounded-2xl rounded-ss-md bg-white/[0.05] px-4 py-3">
@@ -249,9 +248,7 @@ function Bubble({ message }: { message: FitbotMessage }) {
 function Typing() {
   return (
     <div className="flex items-start gap-3" role="status" aria-label="Fitbot כותב">
-      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-ember/15 text-ember">
-        <SparkIcon className="size-5" />
-      </span>
+      <FitbotLogo className="mt-0.5 size-9" />
       <div className="flex flex-col gap-2">
         <p className="font-heading text-label-md font-bold text-ember">Fitbot</p>
         <div className="flex items-center gap-3 rounded-2xl rounded-ss-md bg-white/[0.05] px-4 py-3.5">

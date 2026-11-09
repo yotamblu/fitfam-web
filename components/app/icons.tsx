@@ -114,12 +114,6 @@ export const InfoIcon = ({ className }: IconProps) => (
     <path d="M12 11v5M12 8h.01" />
   </svg>
 );
-export const SparkIcon = ({ className }: IconProps) => (
-  <svg {...base} className={className}>
-    <path d="M12 3c.6 4.6 2.4 6.4 7 7-4.6.6-6.4 2.4-7 7-.6-4.6-2.4-6.4-7-7 4.6-.6 6.4-2.4 7-7z" />
-    <path d="M19 15.5c.2 1.6.9 2.3 2.5 2.5-1.6.2-2.3.9-2.5 2.5-.2-1.6-.9-2.3-2.5-2.5 1.6-.2 2.3-.9 2.5-2.5z" />
-  </svg>
-);
 export const SendIcon = ({ className }: IconProps) => (
   <svg {...base} className={className}>
     <path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />

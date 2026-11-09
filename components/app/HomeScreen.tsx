@@ -192,7 +192,7 @@ export function ProgressCard({ stats, user }: { stats: Stats; user?: { displayNa
   const toNext = stats.xpForNextLevel - stats.xpIntoLevel;
   const left = Math.max(0, stats.weeklyGoal - stats.weekCount);
   return (
-    <Card className="ff-rise-in divide-y divide-white/[0.06] [animation-delay:120ms]">
+    <Card data-tour="home-stats" className="ff-rise-in divide-y divide-white/[0.06] [animation-delay:120ms]">
       <div className="p-5">
         {user && (
           <div className="mb-4 flex items-center gap-3">
