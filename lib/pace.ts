@@ -54,3 +54,14 @@ export function splitFiveK(seconds: number | null): { minutes: string; seconds: 
   if (seconds === null) return { minutes: "", seconds: "" };
   return { minutes: String(Math.floor(seconds / 60)), seconds: String(seconds % 60).padStart(2, "0") };
 }
+
+export const ZONE_MIN_SEC = 120; // 2:00 per km
+export const ZONE_MAX_SEC = 1200; // 20:00 per km
+
+/** "6:30" (minutes:seconds per km) -> seconds, or null when it is not a valid pace. */
+export function parseClock(text: string): number | null {
+  const match = /^(\d{1,2}):([0-5]\d)$/.exec(text.trim());
+  if (!match) return null;
+  const total = Number(match[1]) * 60 + Number(match[2]);
+  return total >= ZONE_MIN_SEC && total <= ZONE_MAX_SEC ? total : null;
+}

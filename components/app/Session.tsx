@@ -19,6 +19,9 @@ type SessionValue = {
   pace: PaceStatus | null;
   savePace: (fiveKSec: number) => Promise<void>;
   clearPace: () => Promise<void>;
+  /** Own range for easy / threshold / interval, seconds per km; resetPaceZone(kind) goes back to the calculated one. */
+  savePaceZone: (kind: string, fastSecPerKm: number, slowSecPerKm: number) => Promise<void>;
+  resetPaceZone: (kind: string) => Promise<void>;
   /** Terms and health declaration state; null only while loading or if that call failed (the API still enforces it). */
   consent: ConsentStatus | null;
   setConsent: (status: ConsentStatus) => void;
@@ -154,6 +157,14 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
     setPace(await api.clearPace());
   }, []);
 
+  const savePaceZone = useCallback(async (kind: string, fast: number, slow: number) => {
+    setPace(await api.setPaceZone(kind, fast, slow));
+  }, []);
+
+  const resetPaceZone = useCallback(async (kind: string) => {
+    setPace(await api.resetPaceZone(kind));
+  }, []);
+
   const reloadPlans = useCallback(async () => {
     try {
       setPlans(await api.myPlans());
@@ -182,8 +193,8 @@ export default function SessionProvider({ children }: { children: ReactNode }) {
   const value = useMemo<SessionValue | null>(() => {
     if (!user || !plans) return null;
     const activePlan = plans.find((p) => p.planSlug === slug) ?? plans[0] ?? null;
-    return { user, plans, stats, reloadStats, pace, savePace, clearPace, consent, setConsent, fitbot, setFitbot, activePlan, setActiveSlug, reloadPlans, logout };
-  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, consent, fitbot, slug, setActiveSlug, reloadPlans, logout]);
+    return { user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, setConsent, fitbot, setFitbot, activePlan, setActiveSlug, reloadPlans, logout };
+  }, [user, plans, stats, reloadStats, pace, savePace, clearPace, savePaceZone, resetPaceZone, consent, fitbot, slug, setActiveSlug, reloadPlans, logout]);
 
   if (error) {
     return (

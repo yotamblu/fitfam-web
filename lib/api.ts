@@ -111,6 +111,10 @@ export type PaceInfo = {
   /** target time of one distance repeat, in seconds (only for repeats measured in metres) */
   repFastSec: number | null;
   repSlowSec: number | null;
+  /** true when the customer set their own range for this kind (the calculated one is kept next to it) */
+  custom: boolean;
+  calcFastSecPerKm: number | null;
+  calcSlowSecPerKm: number | null;
 };
 
 export type PaceStatus = {
@@ -238,6 +242,9 @@ export const api = {
   pace: () => request<PaceStatus>("/me/pace"),
   setPace: (fiveKSec: number) => request<PaceStatus>("/me/pace", { method: "PUT", body: JSON.stringify({ fiveKSec }) }),
   clearPace: () => request<PaceStatus>("/me/pace", { method: "DELETE" }),
+  setPaceZone: (kind: string, fastSecPerKm: number, slowSecPerKm: number) =>
+    request<PaceStatus>(`/me/pace/zones/${encodeURIComponent(kind)}`, { method: "PUT", body: JSON.stringify({ fastSecPerKm, slowSecPerKm }) }),
+  resetPaceZone: (kind: string) => request<PaceStatus>(`/me/pace/zones/${encodeURIComponent(kind)}`, { method: "DELETE" }),
   myPlans: () => request<MyPlan[]>("/me/plans"),
   roadmap: (slug: string) => request<Roadmap>(`/me/plans/${encodeURIComponent(slug)}/roadmap`),
   workout: (id: string) => request<CustomerWorkout>(`/workouts/${id}`),
